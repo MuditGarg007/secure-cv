@@ -50,4 +50,10 @@ export const RECOVERY_COOLDOWN_CODE_LIVENESS_MS = 24 * 60 * 60 * 1000;
 export const RECOVERY_COOLDOWN_CODE_ONLY_MS = 72 * 60 * 60 * 1000;
 export const RECOVERY_IDLE_EXPIRY_MS = 48 * 60 * 60 * 1000;
 export const RECOVERY_BIND_COOKIE = "rec_bind";
+// Binding cookie must outlive the longest possible request: max cooldown + idle window.
+export const RECOVERY_BIND_TTL_MS = RECOVERY_COOLDOWN_CODE_ONLY_MS + RECOVERY_IDLE_EXPIRY_MS;
+// Total failed liveness attempts per recovery request (across challenges) before it is cancelled.
+export const RECOVERY_LIVENESS_MAX_FAILS = 3;
+// /recover/[id] re-reads the state this often while cooling down.
+export const RECOVERY_POLL_MS = 5 * 1000;
 // ===== end recovery =====
