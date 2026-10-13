@@ -2,6 +2,8 @@
 
 Worktree `~/secure-bio`, branch `agent/bio`, web port **3200** (`ORIGIN=http://localhost:3200`), bio service port **8200** (`BIO_URL=http://localhost:8200`). Follow `docs/agents/workflow.md` strictly. Your scope check: `scripts/check-scope.sh bio`.
 
+Bio env: create `bio/.env` (never committed) with `BIO_INTERNAL_TOKEN` copied from `web/.env.local` (already set for you), a fresh `BIO_TEMPLATE_KEY` (`python -c "import os,base64;print(base64.b64encode(os.urandom(32)).decode())"`) and `BIO_FAKE=1` while building. Run it with `uv run fastapi dev app/main.py --port 8200`.
+
 **Read**: `ps.md`, `docs/foundation.md`, `docs/biometrics.md` (your spec), `docs/security.md`, `docs/api.md` (Biometrics + step-up), `docs/flows.md` (§1 step 3, §3), `docs/auth.md#sessions`.
 
 ## Mission
