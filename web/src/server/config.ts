@@ -37,6 +37,14 @@ export const LIVENESS_MAX_ATTEMPTS = 3;
 export const ENROLL_FRAME_COUNT = 5;
 export const MAX_LIVENESS_FRAMES = 80;
 export const BIO_TIMEOUT_MS = 20 * 1000;
+export const MAX_FRAME_BYTES = 300_000; // per JPEG frame (bio enforces the same cap)
+export const CAPTURE_WIDTH = 640;
+export const CAPTURE_HEIGHT = 480;
+export const CAPTURE_FPS = 10;
+export const CAPTURE_JPEG_QUALITY = 0.7;
+export const CAPTURE_COUNTDOWN_MS = 3 * 1000; // "get ready" before the capture window starts
+export const ENROLL_FRAME_INTERVAL_MS = 300; // spacing between the 5 enrollment frames
+export const BIO_STATUS_CACHE_MS = 10 * 1000; // how long web trusts bio's /healthz fake flag
 // ===== end bio =====
 
 // ===== devices + admin (agent C) =====
