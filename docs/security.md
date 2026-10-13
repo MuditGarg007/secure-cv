@@ -59,3 +59,14 @@ So liveness only ever adds assurance on top of a passkey login (step-up) or alon
 - [ ] zod on input?
 - [ ] auth_events row written?
 - [ ] No scores, codes, tokens or frames in responses or logs?
+
+## Decisions (agent D)
+- Recovery `complete` runs credential/session revocation, new-credential insert and recovery-code
+  "used" marking in one DB transaction, gated on a conditional `ready → completed` state update, so a
+  double-submit or a cancel racing a complete can't both win.
+- Recovery liveness attempts are capped per *request* (counted from `recovery_liveness_fail`
+  auth_events, not just per challenge), so fetching a fresh challenge can't reset the 3-fail limit.
+- The new recovery code is returned once in the `complete/verify` response (the deliverable) but is
+  never logged; events record only that a code was generated.
+- Recovery binding cookie TTL = longest cooldown (72 h) + idle window (48 h), so the browser can
+  always finish a request that is still legally open.
