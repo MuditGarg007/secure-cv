@@ -49,7 +49,7 @@ Lives in `phish/` (own `package.json`, plain Node ESM + Playwright as a dev dep)
 `attack3.mjs` drives Chromium with a CDP **virtual authenticator**: it registers a passkey on the
 real origin, then exports its **private key** via `WebAuthn.getCredentials` (worst case — as if the
 authenticator itself leaked). `forge.mjs` hand-builds an assertion with Node's `crypto`: a valid
-ECDSA-P256 signature over `authenticatorData || sha256(clientDataJSON)`, where `clientDataJSON.origin`
+ES256 (ECDSA P-256) or Ed25519 signature, whichever key the authenticator made, over `authenticatorData || sha256(clientDataJSON)`, where `clientDataJSON.origin`
 is the **clone's** origin. It is POSTed to the real `/api/auth/login/verify` with a forged
 `Origin: <real origin>` header (so the CSRF/origin header check passes). The server still rejects it
 with `ORIGIN_MISMATCH` + `login_fail reason=origin_mismatch`, because the **signed** origin inside

@@ -27,8 +27,11 @@ export function forgeAssertion({ privateKeyPkcs8, credentialId, userHandle, rpId
   // rpIdHash | flags (UP 0x01 + UV 0x04) | signCount
   const authenticatorData = Buffer.concat([sha256(rpId), Buffer.from([0x05]), counter]);
   const signed = Buffer.concat([authenticatorData, sha256(clientDataJSON)]);
-  const signature = sign("sha256", signed, key); // ECDSA P-256, DER encoded, as WebAuthn expects
-  const signatureValid = verify("sha256", signed, createPublicKey(key), signature);
+  // ES256 (ECDSA P-256, DER) or EdDSA (Ed25519): newer Chromium virtual authenticators pick
+  // Ed25519 when the server offers it, and Ed25519 signs the message itself (no digest).
+  const digest = key.asymmetricKeyType === "ed25519" ? null : "sha256";
+  const signature = sign(digest, signed, key);
+  const signatureValid = verify(digest, signed, createPublicKey(key), signature);
   return {
     signatureValid,
     response: {
