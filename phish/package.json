@@ -1,0 +1,14 @@
+{
+  "name": "phish",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Phishing-resistance demo: a look-alike sign-in page that tries to steal a passkey (docs/phishing-demo.md).",
+  "scripts": {
+    "start": "node server.mjs",
+    "attack3": "node attack3.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
