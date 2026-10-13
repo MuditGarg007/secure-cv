@@ -137,6 +137,8 @@ export async function captureFrames(
     maxFrames?: number;
     signal?: AbortSignal;
     onTick?: (elapsedMs: number) => void;
+    /** Skip a slot when capture fell a whole frame behind (keeps liveness timing honest). */
+    dropLate?: boolean;
   },
 ): Promise<CapturedFrame[]> {
   const fps = opts.fps ?? CAPTURE_FPS;
@@ -149,7 +151,7 @@ export async function captureFrames(
     if (opts.signal?.aborted) throw new DOMException("Capture aborted", "AbortError");
     const wait = start + offset - performance.now();
     if (wait > 0) await sleep(wait);
-    else if (wait < -1000 / fps) continue; // fell a whole frame behind: skip this slot
+    else if ((opts.dropLate ?? true) && wait < -1000 / fps) continue; // fell a whole frame behind
     const t = performance.now();
     const blob = await grabJpeg(video, canvas);
     if (blob && blob.size > 0 && blob.size <= MAX_FRAME_BYTES) {
