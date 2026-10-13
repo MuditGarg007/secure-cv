@@ -81,7 +81,7 @@ export default async function HomePage() {
 
       <div className="grid grid-cols-2 gap-2">
         {LINKS.map(({ href, label, icon: Icon }) => (
-          <Button key={href} variant="outline" className="h-14 text-base" render={<Link href={href} />}>
+          <Button key={href} variant="outline" className="h-14 text-base" nativeButton={false} render={<Link href={href} />}>
             <Icon /> {label}
           </Button>
         ))}

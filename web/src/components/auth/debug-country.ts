@@ -52,3 +52,10 @@ export function useDebugCountry(): string {
 export function debugHeaders(enabled: boolean, country: string): Record<string, string> | undefined {
   return enabled ? { "X-Debug-Country": country } : undefined;
 }
+
+const noopSubscribe = () => () => {};
+
+/** False during SSR and the hydration render, true after (client snapshot is real). */
+export function useHydrated(): boolean {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}

@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BIG } from "@/components/common/PageShell";
 import { SimulateLocation } from "@/components/auth/SimulateLocation";
-import { debugHeaders, useDebugCountry } from "@/components/auth/debug-country";
+import { debugHeaders, useDebugCountry, useHydrated } from "@/components/auth/debug-country";
 import { ApiClientError } from "@/lib/api";
 import { authenticatePasskey, errorMessage } from "@/lib/webauthn-client";
 
@@ -21,6 +21,7 @@ const BLOCKED_TEXT = "We stopped this sign-in. Check your other devices.";
 export function SignInPanel({ next, debugRisk }: { next: string | null; debugRisk: boolean }) {
   const router = useRouter();
   const country = useDebugCountry();
+  const hydrated = useHydrated();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blocked, setBlocked] = useState(false);
@@ -44,6 +45,8 @@ export function SignInPanel({ next, debugRisk }: { next: string | null; debugRis
   // Conditional UI: passkeys offered in the username field's autofill. Restarted when the
   // simulated country changes so the header matches; a button ceremony aborts it.
   useEffect(() => {
+    // Wait for hydration so the header uses the stored country, not the SSR default.
+    if (!hydrated) return;
     let live = true;
     (async () => {
       if (!window.PublicKeyCredential?.isConditionalMediationAvailable) return;
@@ -64,7 +67,7 @@ export function SignInPanel({ next, debugRisk }: { next: string | null; debugRis
       live = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [country, debugRisk]);
+  }, [country, debugRisk, hydrated]);
 
   async function signIn() {
     setBusy(true);
@@ -119,7 +122,7 @@ export function SignInPanel({ next, debugRisk }: { next: string | null; debugRis
         Your browser shows a QR code for your phone, or asks you to tap your security key.
       </p>
 
-      <Button className={BIG} variant="ghost" render={<Link href="/recover" />}>
+      <Button className={BIG} variant="ghost" nativeButton={false} render={<Link href="/recover" />}>
         <LifeBuoy /> Lost my device?
       </Button>
       <p className="text-center text-sm">

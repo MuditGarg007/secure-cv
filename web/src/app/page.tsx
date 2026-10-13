@@ -24,10 +24,10 @@ export default function Landing() {
           </li>
         ))}
       </ul>
-      <Button className={BIG} render={<Link href="/signin" />}>
+      <Button className={BIG} nativeButton={false} render={<Link href="/signin" />}>
         <Fingerprint /> Sign in
       </Button>
-      <Button className={BIG} variant="outline" render={<Link href="/signup" />}>
+      <Button className={BIG} variant="outline" nativeButton={false} render={<Link href="/signup" />}>
         <UserPlus /> Create account
       </Button>
     </PageShell>
