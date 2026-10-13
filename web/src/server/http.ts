@@ -35,6 +35,7 @@ const DEFAULT_MESSAGE: Partial<Record<ErrorCode, string>> = {
   CHALLENGE_EXPIRED: "This took too long. Please try again.",
   WEBAUTHN_FAILED: "Passkey check failed. Please try again.",
   BIO_UNAVAILABLE: "Face check is unavailable right now.",
+  BIO_NOT_ENROLLED: "Face check isn't set up for this account.",
   INTERNAL: "Something went wrong.",
 };
 

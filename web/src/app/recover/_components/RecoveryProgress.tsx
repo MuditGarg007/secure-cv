@@ -308,7 +308,7 @@ function EndStep({ title, text, showStartOver = true }: { title: string; text: s
     <Step icon={<ShieldX />} title={title} voice={`${title}. ${text}`}>
       <p>{text}</p>
       {showStartOver && (
-        <Button className={BIG} render={<Link href="/recover" />}>
+        <Button className={BIG} nativeButton={false} render={<Link href="/recover" />}>
           <RotateCcw /> Start again
         </Button>
       )}
