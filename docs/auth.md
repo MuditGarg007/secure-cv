@@ -71,3 +71,14 @@ First login after sign-up: score 0.
 Country source: `x-vercel-ip-country` / `cf-ipcountry` header if deployed behind such a host, else unknown (signal skipped). Demo: when `DEBUG_RISK=1`, header `X-Debug-Country: XX` overrides it, set by a hidden "Simulate location" toggle on `/signin`.
 
 Weights and thresholds live in `config.ts`.
+
+## Decisions
+- `new_country` needs a known current country AND at least one past country for the user (`login_success`, `step_up_pass`, `register` events). No history = nothing to compare, so the first login scores 0.
+- `ua_change` compares `uaFamily()` of the request with the credential's `last_used_ua` before this login; skipped when there is none.
+- `recent_failures` counts every `login_fail` row for the user in the window (login, reauth and approval failures alike).
+- Step-up `reason` is the coarse category of the heaviest signal: `new_location` / `new_device` / `recent_failures`.
+- On a blocked login the credential's `last_used_at/ua` are put back to their previous values (sign_count stays updated), so an attacker's browser never becomes the "known" one.
+- Reauth challenges are bound to the session (`targetId = session.id`), so a reauth started in one session can't be finished in another.
+- Sign-up inserts the user and credential in one synchronous SQLite transaction (`server/auth/signup.ts`); a handle race returns `HANDLE_TAKEN`.
+- `?next=` accepts only same-site paths: starts with `/`, not `//`, no backslash, whitespace or control chars (`server/auth/safe-next.ts`).
+- Demo "Simulate location" defaults to `IN` (home) and is sent on sign-up too, so sign-up and the first sign-in share a baseline country and choosing another country triggers `new_country`.
