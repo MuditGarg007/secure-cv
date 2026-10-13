@@ -95,7 +95,7 @@ All task items done and committed. Manual testing was done with HTTP scripts and
 **Test evidence**
 - `cd web && pnpm typecheck && pnpm lint && pnpm test`: clean, 12 tests passed.
 - `scripts/check-scope.sh devices`: OK.
-- An HTTP end-to-end run used a Node software authenticator (ES256, attestation "none") against `pnpm dev -p 3300` with dev sessions. All 41 checks passed:
+- An HTTP end-to-end run used a Node software authenticator (ES256, attestation "none") against `pnpm dev -p 3300` with dev sessions. 42 of 43 checks passed. The one failure was a rename in the first run: the test script could not read the credential ids. Rename passed when run again with ids taken from the DB:
   - add key; stale session → `REAUTH_REQUIRED`; bad Origin → 403
   - link start, then status
   - binding cookie, nonce and session checks
