@@ -124,3 +124,8 @@ Read env through a small validated module (zod in web, pydantic-settings in bio)
 - Foundation (schema, sessions, WebAuthn helpers, stubs) built on `main` before the parallel agents start: removes every shared-file conflict and lets the four branches merge cleanly.
 - Migrations generated once with drizzle-kit and applied automatically by the DB client: zero setup per worktree.
 - IDs that come from WebAuthn (credential id, user handle bytes) stored as base64url text, not blobs: matches `@simplewebauthn` types, no conversions.
+- Device link: every approver-side error (bad binding cookie, bad nonce, link not pending) is 404 `NOT_FOUND`, so link ids can't be probed; status transitions are compare-and-set on `status`, so a double submit can't approve or register twice.
+- Admins may revoke a user's last credential (the user then goes through recovery); users get `LAST_CREDENTIAL` for their own last one.
+- `admin_action` events are logged on the admin's user id with `metadata {action, target, targetUserId}`; the owner gets its own `credential_revoked` / `recovery_cancelled` event.
+- Phishing rows in the admin feed: a `login_fail` with `metadata.reason = "origin_mismatch"` is rendered as "Blocked: sign-in from a fake site".
+- Step-up liveness challenges use `targetId = session.id` (attempts per risky login); recovery liveness uses `targetId = recoveryId` and is additionally capped per request from `recovery_liveness_fail` events.

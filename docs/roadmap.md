@@ -13,37 +13,37 @@ Milestones M1–M6 are built in parallel by four agents (see `docs/agents/workfl
 ## M0: Scaffold (master, done on `main`)
 - [x] `web/`: create-next-app (TS, Tailwind, App Router), shadcn, zod, Drizzle + better-sqlite3, Vitest
 - [x] Full schema from `docs/data-model.md`, env module, `config.ts`, `events.ts`, sessions, WebAuthn helpers, contract stubs (`docs/foundation.md`)
-- [ ] `bio/`: uv project, FastAPI `/healthz`, internal token check, `BIO_FAKE` mode, model download script (moved to agent B)
+- [x] `bio/`: uv project, FastAPI `/healthz`, internal token check, `BIO_FAKE` mode, model download script (moved to agent B)
 
 ## M1: Passkeys
-- [ ] Register, login, logout, sessions, `requireSession`, reauth
-- [ ] signCount clone check
-- [ ] Sign-up wizard (steps 1, 2, 4, 5), sign-in page
-- [ ] Recovery code generation + regenerate on `/security`
+- [x] Register, login, logout, sessions, `requireSession`, reauth
+- [x] signCount clone check
+- [x] Sign-up wizard (steps 1, 2, 4, 5), sign-in page
+- [x] Recovery code generation + regenerate on `/security`
 
 ## M2: Face + gesture liveness (USP)
-- [ ] bio: face enroll (embed + encrypt), verify pipeline per `docs/biometrics.md`, pytest for the decision logic
-- [ ] web: camera capture component (frames + timestamps, prompt cards, voice)
-- [ ] Sign-up step 3 enrollment, enroll/delete on `/security`
-- [ ] Risk check + step-up flow + "Simulate location" toggle
+- [x] bio: face enroll (embed + encrypt), verify pipeline per `docs/biometrics.md`, pytest for the decision logic
+- [x] web: camera capture component (frames + timestamps, prompt cards, voice)
+- [x] Sign-up step 3 enrollment, enroll/delete on `/security`
+- [x] Risk check + step-up flow + "Simulate location" toggle
 - [ ] Calibrate thresholds with team captures, record in `docs/biometrics.md#decisions`
 
 ## M3: Devices
-- [ ] QR device link (start, approve, register, polling)
-- [ ] `/devices`: list, rename, remove (reauth), removed section
-- [ ] Add security key
+- [x] QR device link (start, approve, register, polling)
+- [x] `/devices`: list, rename, remove (reauth), removed section
+- [x] Add security key
 
 ## M4: Recovery
-- [ ] State machine + unit tests
-- [ ] Start, liveness, cooldown, cancel banner on active sessions, complete
+- [x] State machine + unit tests
+- [x] Start, liveness, cooldown, cancel banner on active sessions, complete
 
 ## M5: Admin + phishing demo
-- [ ] Admin pages + revoke / cancel recovery
-- [ ] `phish/` clone and attacks 1–4
+- [x] Admin pages + revoke / cancel recovery
+- [x] `phish/` clone and attacks 1–4
 
 ## M6: Submission
-- [ ] `/home`, `/activity`, notifications, voice buttons, 360 px pass
-- [ ] Threat model page or PDF from `docs/security.md`
+- [x] `/home`, `/activity`, notifications, voice buttons, 360 px pass
+- [x] Threat model page or PDF from `docs/security.md`
 - [ ] Rehearse demo script
 
 ## Demo script

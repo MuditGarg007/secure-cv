@@ -27,8 +27,8 @@ The clone page has one button per attack and a log panel showing what happened.
 5. **Contrast (optional).** A fake password + OTP form on the clone that shows the captured values in plain text.
 
 ## Done when
-- [ ] Attacks 1–4 fail with the errors above.
-- [ ] Attack 3 shows up in the admin event feed.
+- [x] Attacks 1–4 fail with the errors above.
+- [x] Attack 3 shows up in the admin event feed.
 - [ ] A screen recording of the run exists for the pitch.
 
 ## Implementation (built)
