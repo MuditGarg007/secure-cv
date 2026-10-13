@@ -40,8 +40,8 @@ Hackathon scope. Two processes, one SQLite file, no other infra.
 | Voice prompts | browser `speechSynthesis` |
 | Web tests | Vitest for pure logic (risk, recovery state machine) |
 | Bio | Python 3.12, FastAPI, uv |
-| Face | InsightFace `buffalo_l` (SCRFD detector + ArcFace embedding) on onnxruntime CPU |
-| Gestures | MediaPipe Tasks `GestureRecognizer` (canned classes) |
+| Face | InsightFace `buffalo_l` (SCRFD detector + ArcFace embedding) run directly on onnxruntime CPU (no `insightface` package; see `docs/biometrics.md#decisions`) |
+| Gestures | MediaPipe Tasks `GestureRecognizer` (canned classes), `mediapipe` pinned to 0.10.x |
 | Bio crypto | `cryptography` AES-256-GCM |
 | Bio tests | pytest |
 

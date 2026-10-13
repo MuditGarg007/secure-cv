@@ -85,7 +85,7 @@ Purposes: registration `register | add_key | link_register | recovery_register`;
 | `lib/ua.ts` | `labelFromUA(ua)` ("Chrome on Android"), `uaFamily(ua)` (risk `ua_change`) |
 | `components/common/PageShell.tsx` | `<PageShell title voiceText? wide?>`, `BIG` button class |
 | `components/common/VoiceButton.tsx` | `<VoiceButton text />` |
-| `components/ui/*` | shadcn (Base UI): alert, alert-dialog, badge, button, card, checkbox, dialog, dropdown-menu, input, label, progress, select, separator, skeleton, sonner (`toast` from `sonner`), table, tabs, textarea, tooltip |
+| `components/ui/*` | shadcn (Base UI): alert, alert-dialog, badge, button, card, checkbox, dialog, dropdown-menu, input, label, progress, select, separator, skeleton, sonner (`toast` from `sonner`), table, tabs, textarea, tooltip. Link buttons: `<Button nativeButton={false} render={<Link href="/x" />}>` (without `nativeButton={false}` Base UI logs an error) |
 
 The root layout renders `AppHeader` (nav + sign out) and the toaster. Sign-out calls `POST /api/auth/logout` (agent A).
 

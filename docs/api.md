@@ -18,10 +18,13 @@ Routes under `/api`, JSON unless marked multipart. Zod schemas next to the route
 ## Biometrics + step-up
 | Method | Path | Auth | Body → Response |
 |---|---|---|---|
-| POST | `/bio/enroll` | full+reauth | multipart `meta={consent:true}` + 5 frames → `{ok}` / `{ok:false, hint}` |
+| GET | `/bio/status` | none | → `{available, fake}` (capture UI shows the dev picker only when `fake`) |
+| POST | `/bio/enroll` | full+reauth | multipart `meta={consent:true}` + `frame_000`..`frame_004` → `{ok}` / `{ok:false, hint}`; `hint` = `no_face \| multiple_faces \| low_quality` |
 | DELETE | `/bio` | full+reauth | → `{ok}` |
 | POST | `/stepup/challenge` | session (pending ok) | → `{challengeId, prompts, expiresAt, captureWindowMs}`. 409 `BIO_NOT_ENROLLED` |
-| POST | `/stepup/verify` | session (pending ok) | multipart `meta={challengeId, timestamps}` + frames → `{passed, hint?, attemptsLeft}`. Pass clears pending and rotates token. |
+| POST | `/stepup/verify` | session (pending ok) | multipart `meta={challengeId, timestamps}` + `frame_000`... → `{passed, hint?, attemptsLeft}`. Pass clears pending and rotates token. |
+
+Frames are JPEG, ≤ 300 KB each (`MAX_FRAME_BYTES`). `meta.fake` (`pass` / `fail:<reason>`) is dev-only and is forwarded to bio only while bio reports `fake: true`.
 
 ## Devices
 | Method | Path | Auth | Body → Response |
@@ -30,13 +33,13 @@ Routes under `/api`, JSON unless marked multipart. Zod schemas next to the route
 | POST | `/devices/:id/revoke` | full+reauth | `{reason:"lost"\|"user"}` → `{ok}`. 409 `LAST_CREDENTIAL` if only one left. |
 | POST | `/devices/key/options` | full+reauth | → `{options}` (register a security key / another passkey) |
 | POST | `/devices/key/verify` | full+reauth | `{response, label}` → `{ok}` |
-| POST | `/link/start` | none | → `{linkId, shortCode, qrUrl}` + `link_bind` cookie. `qrUrl = ORIGIN/link/<id>#<nonce>` |
+| POST | `/link/start` | none | → `{linkId, shortCode, qrUrl, expiresAt}` + `link_bind` cookie. `qrUrl = ORIGIN/link/<id>#<nonce>` |
 | GET | `/link/:id/status` | cookie:link_bind | → `{status}` (new device polls every 2 s) |
 | GET | `/link/:id?n=nonce` | full | → `{shortCode, ua, createdAt}` for approver. 404 on bad nonce. |
 | POST | `/link/:id/approve/options` | full | `{nonce}` → `{options}` |
 | POST | `/link/:id/approve/verify` | full | `{response, decision:"approve"\|"deny"}` → `{ok}` |
-| POST | `/link/:id/register/options` | cookie:link_bind | → `{options}`, only when approved |
-| POST | `/link/:id/register/verify` | cookie:link_bind | `{response}` → `{ok}` + `sid` (full) |
+| POST | `/link/:id/register/options` | cookie:link_bind | → `{options}`, only when approved (403 `FORBIDDEN` before) |
+| POST | `/link/:id/register/verify` | cookie:link_bind | `{response}` → `{ok}` + `sid` (full). 403 `FORBIDDEN` before approval |
 
 ## Account
 | Method | Path | Auth | Body → Response |

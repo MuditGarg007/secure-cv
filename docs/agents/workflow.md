@@ -65,7 +65,7 @@ Rules:
 - No DB schema changes. The schema on `main` is the full `docs/data-model.md`. If you need a column, add a `REQUEST` and work around it.
 - Use foundation helpers (`docs/foundation.md`): `route()` + `parseJson()` for every handler, `requireSession()` / `requirePageSession()` for auth, `startRegistration/finishRegistration/startAuthentication/finishAuthentication` for every passkey ceremony, `logEvent()` for every auth-relevant action, `ApiError` codes from `docs/api.md`.
 - New error codes, event types or env vars: master-only. Use existing ones, or `REQUEST`.
-- UI: shadcn components already in `web/src/components/ui/` (Base UI flavour: use the `render` prop, not `asChild`, e.g. `<Button render={<Link href="/x" />}>Go</Button>`). Don't add shadcn components. Every page uses `PageShell` (title + 🔊), big primary buttons (`BIG` class), works at 360 px.
+- UI: shadcn components already in `web/src/components/ui/` (Base UI flavour: use the `render` prop, not `asChild`, e.g. `<Button nativeButton={false} render={<Link href="/x" />}>Go</Button>`; `nativeButton={false}` is required when rendering a non-button). Don't add shadcn components. Every page uses `PageShell` (title + 🔊), big primary buttons (`BIG` class), works at 360 px.
 - Tests: Vitest for pure logic, in `*.test.ts` next to the module, and the tested module must not import `db`, `env` or `next/*` (put logic in a pure file, call it from the impure one). No tests for UI.
 - Manual testing: run your dev server on YOUR port only (`pnpm dev -p <port>`). Your DB is `web/data/app.db` in your worktree; `pnpm db:reset` whenever you like. Chrome DevTools → WebAuthn tab gives a virtual authenticator for passkey testing. Stop your servers when you finish.
 
