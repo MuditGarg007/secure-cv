@@ -29,10 +29,11 @@ FACE_PRESENCE_MIN = 0.8  # share of frames with exactly one face
 CONTINUITY_MIN = 0.6  # cosine similarity between consecutive face embeddings
 GESTURE_SCORE_MIN = 0.6
 GESTURE_HOLD_MS = 300  # each prompt held at least this long
-GESTURE_MAX_GAP_MS = 250  # a hold survives a dropped/misread frame up to this gap
+GESTURE_MAX_GAP_MS = 450  # a hold survives one dropped/misread analysed frame (~5 fps)
 HAND_FACE_MAX_DIST = 3.0  # hand centre within this many face widths of the face centre
 CAPTURE_WINDOW_MS = 8_000  # same as web LIVENESS_CAPTURE_WINDOW_MS
 TIMING_SLACK_MS = 1_000  # frame span may exceed the window by this much (timer jitter)
+ANALYZE_MIN_GAP_MS = 180  # browser sends ~10 fps; bio analyses frames >= this far apart (~5 fps)
 
 # ---- enrollment ----
 ENROLL_FRAMES = 5
@@ -49,7 +50,7 @@ MAX_PROMPTS = 10
 DET_MODEL = "det_10g.onnx"  # SCRFD-10GF
 REC_MODEL = "w600k_r50.onnx"  # ArcFace R50, 512-d
 GESTURE_MODEL = "gesture_recognizer.task"
-DET_INPUT_SIZE = (640, 480)  # (w, h), multiple of 32; matches the 640x480 capture
+DET_INPUT_SIZE = (480, 352)  # (w, h), multiples of 32; 640x480 frames are scaled to fit
 DET_SCORE_MIN = 0.5
 DET_NMS_IOU = 0.4
 MULTI_FACE_MIN_PX = 40  # smaller detections are ignored (background noise)

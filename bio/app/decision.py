@@ -82,9 +82,14 @@ def decide(
     *,
     now_ms: float,
     expires_at_ms: float,
+    timestamps: Sequence[float] | None = None,
     th: Thresholds = DEFAULT_THRESHOLDS,
 ) -> Decision:
-    """Pass only if every row of the decision table holds. Reasons list every failed row."""
+    """Pass only if every row of the decision table holds. Reasons list every failed row.
+
+    `frames` may be a subset of the upload (see select_frames); `timestamps` are then ALL the
+    uploaded timestamps, so the timing row still covers every frame.
+    """
     reasons: list[str] = []
     n = len(frames)
     single = [f for f in frames if f.faces == 1]
@@ -110,7 +115,8 @@ def decide(
     if matched < len(prompts):
         reasons.append("prompt_missing")
 
-    if not timing_ok(frames, now_ms=now_ms, expires_at_ms=expires_at_ms, th=th):
+    ts = list(timestamps) if timestamps is not None else [f.t_ms for f in frames]
+    if not timing_ok(ts, now_ms=now_ms, expires_at_ms=expires_at_ms, th=th):
         reasons.append("timing")
 
     return Decision(
@@ -122,7 +128,7 @@ def decide(
             "continuityMin": _r(continuity_min),
             "promptsMatched": matched,
             "frames": n,
-            "spanMs": round(frames[-1].t_ms - frames[0].t_ms) if n else 0,
+            "spanMs": round(ts[-1] - ts[0]) if ts else 0,
         },
     )
 
@@ -165,17 +171,28 @@ def match_prompts(frames: Sequence[FrameResult], prompts: Sequence[str], th: Thr
 
 
 def timing_ok(
-    frames: Sequence[FrameResult], *, now_ms: float, expires_at_ms: float, th: Thresholds = DEFAULT_THRESHOLDS
+    ts: Sequence[float], *, now_ms: float, expires_at_ms: float, th: Thresholds = DEFAULT_THRESHOLDS
 ) -> bool:
     """Timestamps strictly increasing from >= 0, span within the capture window, before expiry."""
     if now_ms > expires_at_ms:
         return False
-    ts = [f.t_ms for f in frames]
     if not ts:
         return True  # nothing to time; no_face / prompt_missing already fail it
     if ts[0] < 0 or any(b <= a for a, b in zip(ts, ts[1:])):
         return False
     return ts[-1] - ts[0] <= th.capture_window_ms + th.timing_slack_ms
+
+
+def select_frames(ts: Sequence[float], min_gap_ms: float) -> list[int]:
+    """Indices of the frames to analyse: the first, then each frame >= min_gap_ms after the last
+    pick, and always the last frame. Every analysed frame gets the full face + gesture checks."""
+    picked: list[int] = []
+    for i, t in enumerate(ts):
+        if not picked or t - ts[picked[-1]] >= min_gap_ms:
+            picked.append(i)
+    if ts and picked[-1] != len(ts) - 1:
+        picked.append(len(ts) - 1)
+    return picked
 
 
 @dataclass(frozen=True)

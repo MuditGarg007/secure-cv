@@ -11,8 +11,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from app.config import DET_MODEL, GESTURE_MODEL, MULTI_FACE_MIN_PX, REC_MODEL
-from app.decision import Decision, EnrollFrame, FrameResult, decide, enroll_reason
+from app.config import ANALYZE_MIN_GAP_MS, DET_MODEL, GESTURE_MODEL, MULTI_FACE_MIN_PX, REC_MODEL
+from app.decision import Decision, EnrollFrame, FrameResult, decide, enroll_reason, select_frames
 from app.face import Detector, Embedder, Face, align
 from app.gesture import GestureTracker, Hand
 
@@ -135,5 +135,6 @@ def verify(
     now_ms: float,
     expires_at_ms: float,
 ) -> Decision:
-    rows = analyze(models, frames, timestamps, template)
-    return decide(rows, prompts, now_ms=now_ms, expires_at_ms=expires_at_ms)
+    picked = select_frames(timestamps, ANALYZE_MIN_GAP_MS)
+    rows = analyze(models, [frames[i] for i in picked], [timestamps[i] for i in picked], template)
+    return decide(rows, prompts, now_ms=now_ms, expires_at_ms=expires_at_ms, timestamps=timestamps)

@@ -20,6 +20,7 @@ from app.decision import (
     decide,
     enroll_reason,
     match_prompts,
+    select_frames,
     timing_ok,
 )
 
@@ -196,10 +197,10 @@ def test_low_score_gesture_ignored():
 
 # ---- bound: gesture and the matching face in the same frames ----
 def test_gesture_without_face_does_not_count():
-    # Face hidden in 2 of every 3 Thumb_Up frames: overall presence is fine, but the gesture
+    # Face hidden in 4 of every 5 Thumb_Up frames: overall presence is fine, but the gesture
     # is never seen together with the face for long enough.
     frames = edit(
-        capture(), lambda i, f: f.gesture == "Thumb_Up" and i % 3, faces=0, face_sim=None, prev_sim=None
+        capture(), lambda i, f: f.gesture == "Thumb_Up" and i % 5, faces=0, face_sim=None, prev_sim=None
     )
     d = run(frames)
     assert "no_face" not in d.reasons
@@ -235,12 +236,44 @@ def test_received_after_expiry_fails():
 def test_non_monotonic_timestamps_fail():
     frames = capture()
     frames[10] = replace(frames[10], t_ms=frames[9].t_ms)
-    assert not timing_ok(frames, now_ms=NOW, expires_at_ms=EXPIRES)
+    assert not timing_ok([f.t_ms for f in frames], now_ms=NOW, expires_at_ms=EXPIRES)
 
 
 def test_negative_start_fails():
-    frames = [replace(f, t_ms=f.t_ms - 50) for f in capture()]
-    assert not timing_ok(frames, now_ms=NOW, expires_at_ms=EXPIRES)
+    assert not timing_ok([f.t_ms - 50 for f in capture()], now_ms=NOW, expires_at_ms=EXPIRES)
+
+
+def test_timing_covers_all_uploaded_frames_not_just_analysed_ones():
+    frames = capture()[::2]  # analysed subset looks fine...
+    all_ts = [f.t_ms for f in capture()]
+    all_ts[5] = all_ts[4]  # ...but an unanalysed frame breaks monotonic order
+    d = decide(frames, PROMPTS, now_ms=NOW, expires_at_ms=EXPIRES, timestamps=all_ts)
+    assert d.reasons == ["timing"]
+
+
+def test_subsampled_live_capture_still_passes():
+    sub = [capture()[i] for i in select_frames([f.t_ms for f in capture()], 180)]
+    assert run(sub).passed
+
+
+# ---- frame selection ----
+def test_select_frames_about_5fps_from_10fps():
+    ts = [i * 100 for i in range(80)]
+    picked = select_frames(ts, 180)
+    assert picked[:4] == [0, 2, 4, 6]
+    assert picked[-1] == 79  # last frame always analysed
+    assert len(picked) == 41
+
+
+def test_select_frames_with_jitter():
+    ts = [0, 95, 190, 300, 380, 480, 590]
+    assert select_frames(ts, 180) == [0, 2, 4, 6]
+
+
+def test_select_frames_edge_cases():
+    assert select_frames([], 180) == []
+    assert select_frames([0], 180) == [0]
+    assert select_frames([0, 50], 180) == [0, 1]
 
 
 def test_every_failed_row_is_reported():
