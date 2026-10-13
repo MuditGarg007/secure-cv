@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+web/data/
+bio/models/
+bio/.venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+phish/node_modules/
+phish/test-results/
+*.log
+.DS_Store

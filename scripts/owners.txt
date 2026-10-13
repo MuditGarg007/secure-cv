@@ -1,0 +1,62 @@
+# Path ownership for parallel agents. Format: <agent> <glob>
+# `*` matches across `/` (bash [[ == ]] semantics). A file may be edited ONLY by an
+# agent whose glob matches it. Anything unmatched belongs to `master` (reviewer).
+# Changing this file is master-only.
+
+# ---- shared, section-owned (edit ONLY your own "===== <agent> =====" section) ----
+shared web/src/server/config.ts
+
+# ---- A: auth ----
+auth web/src/app/page.tsx
+auth web/src/app/signup/*
+auth web/src/app/signin/page.tsx
+auth web/src/app/signin/_components/*
+auth web/src/app/home/*
+auth web/src/app/security/*
+auth web/src/app/api/auth/*
+auth web/src/app/api/me/*
+auth web/src/server/auth/*
+auth web/src/server/risk.ts
+auth web/src/server/risk.test.ts
+auth web/src/components/auth/*
+auth docs/auth.md
+auth docs/agents/auth.md
+
+# ---- B: bio ----
+bio bio/*
+bio web/src/app/api/bio/*
+bio web/src/app/api/stepup/*
+bio web/src/app/signin/step-up/*
+bio web/src/server/bio/*
+bio web/src/components/bio/*
+bio web/src/lib/camera.ts
+bio web/src/lib/camera.test.ts
+bio docs/biometrics.md
+bio docs/agents/bio.md
+
+# ---- C: devices + admin ----
+devices web/src/app/devices/*
+devices web/src/app/link/*
+devices web/src/app/activity/*
+devices web/src/app/admin/*
+devices web/src/app/api/devices/*
+devices web/src/app/api/link/*
+devices web/src/app/api/admin/credentials/*
+devices web/src/server/devices/*
+devices web/src/server/admin/*
+devices web/src/components/devices/*
+devices web/src/components/admin/*
+devices web/src/components/events/*
+devices docs/agents/devices.md
+
+# ---- D: recovery + phishing demo + threat model ----
+recovery web/src/app/recover/*
+recovery web/src/app/api/recovery/*
+recovery web/src/app/api/admin/recovery/*
+recovery web/src/app/threat-model/*
+recovery web/src/server/recovery/*
+recovery web/src/components/recovery/*
+recovery phish/*
+recovery docs/phishing-demo.md
+recovery docs/security.md
+recovery docs/agents/recovery.md
