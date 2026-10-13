@@ -21,7 +21,7 @@ The whole biometric stack: the Python `bio/` service, the web-side client and ch
 ## Tasks
 
 ### Phase 1: fake mode end to end (do first)
-- [ ] `bio/`: uv project pinned to **Python 3.12** (mediapipe has no 3.14 wheels; `uv python install 3.12` if needed). FastAPI app `bio/app/main.py`, `config.py` (pydantic-settings + all thresholds from `docs/biometrics.md`), `X-Internal-Token` check on every route except nothing (healthz too is fine to protect; document), `GET /healthz`, `POST /enroll`, `POST /verify` per `docs/biometrics.md#bio-api`. `bio/.env.example`.
+- [ ] `bio/`: uv project pinned to **Python 3.12** (mediapipe has no 3.14 wheels; `uv python install 3.12` if needed). FastAPI app `bio/app/main.py`, `config.py` (pydantic-settings + all thresholds from `docs/biometrics.md`), `X-Internal-Token` check on every route (protecting `/healthz` too is fine; record your choice), `GET /healthz`, `POST /enroll`, `POST /verify` per `docs/biometrics.md#bio-api`. `bio/.env.example`.
 - [ ] `bio/app/crypto.py`: AES-256-GCM template blob `nonce(12)|ct|tag`, AAD = userId. pytest: round trip, wrong user fails, tamper fails.
 - [ ] `BIO_FAKE=1`: no models loaded, decision from `meta.fake` (`"pass"` / `"fail:<reason>"`); enroll returns a real encrypted dummy template so the crypto path is exercised.
 - [ ] `web/src/server/bio/client.ts`: calls bio with `X-Internal-Token`, timeout `BIO_TIMEOUT_MS`, any network error → `ApiError("BIO_UNAVAILABLE")`. Never log frames or scores.
@@ -45,7 +45,7 @@ The whole biometric stack: the Python `bio/` service, the web-side client and ch
 In-browser MediaPipe prompt ticking (UX only), MiniFASNet anti-spoof.
 
 ## How to test before A's login is merged
-Your branch has no `/api/auth/*`, so no real passkey sessions. Never add a login backdoor to the app. Use the dev CLI (`docs/foundation.md#dev-sessions`): `pnpm dev:session tester --pending --face` gives a step-up-pending session for `/signin/step-up`; `pnpm dev:session tester` gives a fresh full session for enrollment (reauth is fresh for 5 min). The `withReauth` retry path needs A's routes and is verified by the master after merge.
+Your branch has no `/api/auth/*`, so no real passkey sessions. Never add a login backdoor to the app. Use the dev CLI (`docs/foundation.md#dev-sessions`): `pnpm dev:session tester --pending --face` gives a step-up-pending session for `/signin/step-up` (`--face` writes a placeholder template that can't be decrypted: in fake mode, skip decryption when the blob is `DEV-FAKE-TEMPLATE`, or enroll through your UI first to get a real one); `pnpm dev:session tester` gives a fresh full session for enrollment (reauth is fresh for 5 min). The `withReauth` retry path needs A's routes and is verified by the master after merge.
 
 ## Status
 _Tick the task boxes above as you commit; short progress notes here._
