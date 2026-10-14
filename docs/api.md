@@ -19,9 +19,9 @@ Routes under `/api`, JSON unless marked multipart. Zod schemas next to the route
 | Method | Path | Auth | Body → Response |
 |---|---|---|---|
 | GET | `/bio/status` | none | → `{available, fake}` (capture UI shows the dev picker only when `fake`) |
-| POST | `/bio/enroll` | full+reauth | multipart `meta={consent:true}` + `frame_000`..`frame_004` → `{ok}` / `{ok:false, hint}`; `hint` = `no_face \| multiple_faces \| low_quality` |
+| POST | `/bio/enroll` | full+reauth | multipart `meta={consent:true}` + `frame_000`..`frame_019` (5 face photos, then 3 x 5 frames of the user's own gesture) → `{ok}` / `{ok:false, hint}`; `hint` = `no_face \| multiple_faces \| low_quality \| no_hand \| multiple_hands \| gesture_unstable` |
 | DELETE | `/bio` | full+reauth | → `{ok}` |
-| POST | `/stepup/challenge` | session (pending ok) | → `{challengeId, prompts, expiresAt, captureWindowMs}`. 409 `BIO_NOT_ENROLLED` |
+| POST | `/stepup/challenge` | session (pending ok) | → `{challengeId, prompts, expiresAt, captureWindowMs}`; `prompts` = `"Custom"` (the user's own gesture) + one canned gesture, random order. 409 `BIO_NOT_ENROLLED` |
 | POST | `/stepup/verify` | session (pending ok) | multipart `meta={challengeId, timestamps}` + `frame_000`... → `{passed, hint?, attemptsLeft}`. Pass clears pending and rotates token. |
 
 Frames are JPEG, ≤ 300 KB each (`MAX_FRAME_BYTES`). `meta.fake` (`pass` / `fail:<reason>`) is dev-only and is forwarded to bio only while bio reports `fake: true`.

@@ -10,16 +10,17 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app import pipeline
-from app.config import DEV_FAKE_TEMPLATE, MAX_FRAME_BYTES, Settings
+from app.config import DEV_FAKE_TEMPLATE, ENROLL_TOTAL_FRAMES, MAX_FRAME_BYTES, Settings
 from app.crypto import decrypt_template, encrypt_template
 from app.decision import Decision
+from app.fake import fake_template
 from app.server import create_app
 
 TOKEN = "test-token-123456"
 KEY_B64 = base64.b64encode(os.urandom(32)).decode()
 AUTH = {"X-Internal-Token": TOKEN}
 JPEG = b"\xff\xd8\xff\xe0fake-jpeg\xff\xd9"
-PROMPTS = ["Victory", "Thumb_Up", "Open_Palm"]
+PROMPTS = ["Custom", "Victory"]
 
 
 def settings(fake: bool) -> Settings:
@@ -53,7 +54,7 @@ def verify_meta(template: str, **kw) -> dict:
 
 def enroll(client, user="user-a", fake=None) -> dict:
     meta = {"userId": user} | ({"fake": fake} if fake else {})
-    r = client.post("/enroll", headers=AUTH, files=files(meta, 5))
+    r = client.post("/enroll", headers=AUTH, files=files(meta, ENROLL_TOTAL_FRAMES))
     assert r.status_code == 200, r.text
     return r.json()
 
@@ -80,23 +81,26 @@ def test_no_docs_exposed(client):
 def test_fake_enroll_returns_real_encrypted_template(client):
     body = enroll(client)
     assert body["ok"] is True
-    vec = decrypt_template(base64.b64decode(KEY_B64), "user-a", body["templateEnc"])
-    assert vec.shape == (512,)
-    assert np.isclose(np.linalg.norm(vec), 1.0, atol=1e-5)
+    tpl = decrypt_template(base64.b64decode(KEY_B64), "user-a", body["templateEnc"])
+    assert tpl.face.shape == (512,)
+    assert np.isclose(np.linalg.norm(tpl.face), 1.0, atol=1e-5)
+    assert tpl.pose.shape[0] > 0
+    assert tpl.pose_tau > 0
 
 
-def test_fake_enroll_failure(client):
-    assert enroll(client, fake="fail:no_face") == {"ok": False, "reason": "no_face"}
+@pytest.mark.parametrize("reason", ["no_face", "gesture_unstable", "no_hand"])
+def test_fake_enroll_failure(client, reason):
+    assert enroll(client, fake=f"fail:{reason}") == {"ok": False, "reason": reason}
 
 
-@pytest.mark.parametrize("n", [4, 6])
-def test_enroll_needs_exactly_5_frames(client, n):
+@pytest.mark.parametrize("n", [5, ENROLL_TOTAL_FRAMES - 1, ENROLL_TOTAL_FRAMES + 1])
+def test_enroll_needs_face_and_gesture_frames(client, n):
     r = client.post("/enroll", headers=AUTH, files=files({"userId": "u"}, n))
     assert r.status_code == 400
 
 
 def test_enroll_rejects_unknown_fake_reason(client):
-    r = client.post("/enroll", headers=AUTH, files=files({"userId": "u", "fake": "fail:bogus"}, 5))
+    r = client.post("/enroll", headers=AUTH, files=files({"userId": "u", "fake": "fail:bogus"}, ENROLL_TOTAL_FRAMES))
     assert r.status_code == 400
 
 
@@ -119,6 +123,12 @@ def test_fake_verify_fail_reason(client):
     tpl = enroll(client)["templateEnc"]
     r = client.post("/verify", headers=AUTH, files=files(verify_meta(tpl, fake="fail:prompt_missing"), 10))
     assert r.json() == {"passed": False, "reasons": ["prompt_missing"], "scores": {"fake": True}}
+
+
+def test_fake_verify_gesture_mismatch(client):
+    tpl = enroll(client)["templateEnc"]
+    r = client.post("/verify", headers=AUTH, files=files(verify_meta(tpl, fake="fail:gesture_mismatch"), 10))
+    assert r.json()["reasons"] == ["gesture_mismatch"]
 
 
 def test_fake_verify_accepts_dev_placeholder(client):
@@ -145,7 +155,7 @@ def test_expired_challenge_fails_timing(client):
     "change",
     [
         {"timestamps": [0, 100]},  # count mismatch
-        {"prompts": ["Wave"]},  # not a canned gesture
+        {"prompts": ["Wave"]},  # not a canned gesture nor the custom one
         {"prompts": []},
         {"expiresAt": "2030-01-01T00:00:00"},  # no timezone
         {"extra": 1},
@@ -200,7 +210,7 @@ def test_real_mode_ignores_fake_field(monkeypatch):
     monkeypatch.setattr(pipeline, "verify", fake_pipeline_verify)
     with TestClient(create_app(settings(fake=False), models=object())) as c:
         assert c.get("/healthz", headers=AUTH).json() == {"ok": True, "fake": False}
-        tpl = encrypt_template(base64.b64decode(KEY_B64), "user-a", np.ones(512, dtype=np.float32) / np.sqrt(512))
+        tpl = encrypt_template(base64.b64decode(KEY_B64), "user-a", fake_template())
         r = c.post("/verify", headers=AUTH, files=files(verify_meta(tpl, fake="pass"), 10))
         assert r.json()["passed"] is False
         assert seen["prompts"] == PROMPTS

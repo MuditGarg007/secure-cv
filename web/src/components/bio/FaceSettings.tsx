@@ -1,6 +1,6 @@
 "use client";
 // CONTRACT, owned by agent B (bio). Props are FROZEN.
-// Used by agent A on /security: enroll / re-enroll / delete face (reauth via withReauth).
+// Used by agent A on /security: enroll / re-enroll / delete face + gesture (reauth via withReauth).
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -36,7 +36,7 @@ export function FaceSettings({ enrolled }: FaceSettingsProps) {
     try {
       await withReauth(() => api("/api/bio", { method: "DELETE" }));
       setConfirmOpen(false);
-      toast.success("Face data deleted.");
+      toast.success("Face and gesture data deleted.");
       router.refresh();
     } catch (e) {
       if (!(e instanceof ApiClientError && e.code === "CANCELLED")) toast.error(errorMessage(e));
@@ -49,12 +49,12 @@ export function FaceSettings({ enrolled }: FaceSettingsProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ScanFace className="size-5" /> Face check
+          <ScanFace className="size-5" /> Face and gesture check
           <Badge variant={enrolled ? "default" : "secondary"}>{enrolled ? "On" : "Off"}</Badge>
         </CardTitle>
         <CardDescription>
           {enrolled
-            ? "Unusual sign-ins ask for your face and a few hand signs. Recovery with your code takes 1 day."
+            ? "Unusual sign-ins ask for your face, your own gesture and one hand sign we pick. Recovery with your code takes 1 day."
             : "Off: unusual sign-ins are blocked, and recovery with your code takes 3 days."}
         </CardDescription>
       </CardHeader>
@@ -65,7 +65,7 @@ export function FaceSettings({ enrolled }: FaceSettingsProps) {
             onDone={(ok) => {
               setEnrolling(false);
               if (ok) {
-                toast.success(enrolled ? "Face updated." : "Face check is on.");
+                toast.success(enrolled ? "Face and gesture updated." : "Face and gesture check is on.");
                 router.refresh();
               }
             }}
@@ -73,11 +73,11 @@ export function FaceSettings({ enrolled }: FaceSettingsProps) {
         ) : (
           <>
             <Button className={BIG} onClick={() => setEnrolling(true)}>
-              <ScanFace /> {enrolled ? "Scan my face again" : "Set up face check"}
+              <ScanFace /> {enrolled ? "Redo face and gesture" : "Set up face check"}
             </Button>
             {enrolled && (
               <Button variant="destructive" className={BIG} onClick={() => setConfirmOpen(true)}>
-                <Trash2 /> Delete my face data
+                <Trash2 /> Delete my face and gesture data
               </Button>
             )}
           </>
@@ -87,9 +87,9 @@ export function FaceSettings({ enrolled }: FaceSettingsProps) {
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete your face data?</AlertDialogTitle>
+            <AlertDialogTitle>Delete your face and gesture data?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your encrypted face template is erased. After that, unusual sign-ins are blocked instead of checked, and
+              Your encrypted face and gesture template is erased. After that, unusual sign-ins are blocked instead of checked, and
               account recovery with your code takes 3 days instead of 1. You can set it up again any time.
             </AlertDialogDescription>
           </AlertDialogHeader>

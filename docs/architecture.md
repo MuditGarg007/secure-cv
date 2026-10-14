@@ -119,7 +119,7 @@ Read env through a small validated module (zod in web, pydantic-settings in bio)
 
 - SQLite + in-DB challenges instead of Postgres + Redis: one process, zero setup, enough for a demo.
 - Polling instead of SSE for device-link status: simpler, 2 s interval is fine.
-- Only canned gestures (no custom gesture): random prompts are what defeat replay; custom gestures add enrollment work for little security.
+- Custom gesture + one random canned gesture per check (changed 2026-10-14 at the user's request, replacing 3 random canned ones): the user picks their own hand shape; the random canned sign keeps replay protection. See `docs/biometrics.md#custom-gesture`.
 - No email: notifications are in-app only. Recovery alerts reach any still-signed-in device.
 - Foundation (schema, sessions, WebAuthn helpers, stubs) built on `main` before the parallel agents start: removes every shared-file conflict and lets the four branches merge cleanly.
 - Migrations generated once with drizzle-kit and applied automatically by the DB client: zero setup per worktree.

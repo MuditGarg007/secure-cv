@@ -79,9 +79,9 @@ export function RecoveryProgress({ recoveryId }: { recoveryId: string }) {
         <Step
           icon={<ShieldCheck />}
           title="Step 1 of 3: face check"
-          voice="Show your face to the camera and make the hand signs you are asked for, next to your face."
+          voice="Show your face to the camera, then your own gesture and the hand sign you are asked for, next to your face."
         >
-          <p>Show your face and make the hand signs you see, next to your face.</p>
+          <p>Show your face, then your own gesture and the hand sign you see, next to your face.</p>
           <LivenessCheck
             challengeUrl={`/api/recovery/${recoveryId}/liveness/challenge`}
             verifyUrl={`/api/recovery/${recoveryId}/liveness/verify`}

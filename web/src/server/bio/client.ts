@@ -3,7 +3,7 @@ import { z } from "zod";
 import { BIO_STATUS_CACHE_MS, BIO_TIMEOUT_MS } from "@/server/config";
 import { env } from "@/server/env";
 import { ApiError } from "@/server/http";
-import type { Gesture } from "@/server/bio/challenge";
+import type { Prompt } from "@/server/bio/challenge";
 import { buildFrameForm } from "@/lib/camera";
 
 // HTTP client for the bio service (docs/biometrics.md#bio-api). Every call carries
@@ -76,7 +76,7 @@ export async function bioEnroll(opts: { userId: string; frames: readonly Blob[];
 export async function bioVerify(opts: {
   userId: string;
   templateEnc: string;
-  prompts: readonly Gesture[];
+  prompts: readonly Prompt[];
   expiresAt: Date;
   timestamps: readonly number[];
   frames: readonly Blob[];

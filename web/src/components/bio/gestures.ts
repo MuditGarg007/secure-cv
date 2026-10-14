@@ -1,4 +1,4 @@
-import type { Gesture } from "@/server/bio/challenge";
+import type { Gesture, Prompt } from "@/server/bio/challenge";
 import type { LivenessHint } from "@/server/bio/liveness";
 import type { EnrollHint } from "@/server/bio/rules";
 
@@ -14,9 +14,16 @@ export const GESTURE_UI: Record<Gesture, { emoji: string; label: string; say: st
   ILoveYou: { emoji: "🤟", label: "I love you sign", say: "Show the I love you sign: thumb, first and little finger up" },
 };
 
+/** Prompt card for any prompt, including the user's own gesture (we never know what it looks like). */
+export const PROMPT_UI: Record<Prompt, { emoji: string; label: string; say: string }> = {
+  ...GESTURE_UI,
+  Custom: { emoji: "🔐", label: "Your own gesture", say: "Show your own secret gesture" },
+};
+
 export const LIVENESS_HINT_TEXT: Record<LivenessHint, string> = {
   face_not_visible: "We couldn't see your face clearly. Face the camera in good light, with only you in view.",
-  gesture_not_seen: "We didn't see every hand sign. Hold each one next to your face until the next one appears.",
+  gesture_not_seen:
+    "We didn't see every hand sign. Hold each one next to your face until the next one appears, and lower your hand in between.",
   too_slow: "That took too long. Start again and follow the prompts.",
   try_again: "That didn't work. Look straight at the camera and try again.",
 };
@@ -25,6 +32,10 @@ export const ENROLL_HINT_TEXT: Record<EnrollHint, string> = {
   no_face: "We couldn't find your face in every photo. Center your face in the oval and keep still.",
   multiple_faces: "We saw more than one face. Make sure only you are in view.",
   low_quality: "The photos weren't clear enough. Move a little closer, face a light and keep still.",
+  no_hand: "We couldn't see your hand in every capture. Hold it up next to your face, fully in view, until the capture ends.",
+  multiple_hands: "We saw two hands. Use one hand for your gesture and keep the other out of view.",
+  gesture_unstable:
+    "Your gesture looked different each time. Pick a shape you can repeat easily and make it the same way each time.",
 };
 
 export const SKIP_WARNING = "Without this, unusual sign-ins get blocked and recovery takes 3 days.";

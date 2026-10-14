@@ -16,8 +16,8 @@ const covered: [string, string][] = [
   ["Phishing / look-alike site", "WebAuthn origin + rpID binding, plus a server-side origin check on every assertion. A credential signed for a clone is rejected (ORIGIN_MISMATCH). Shown live in the phishing demo."],
   ["Password reuse, stuffing, breach dumps", "No passwords exist. The server stores only public keys, so a dump has nothing to replay."],
   ["SIM swap, OTP interception, OTP social engineering", "No SMS, email or TOTP one-time codes anywhere in sign-in or recovery."],
-  ["Database leak", "Only public keys, argon2id recovery-code hashes, and AES-256-GCM face templates whose key lives in the bio service, not the web DB."],
-  ["Photo or replayed video at step-up", "A fresh random 3-gesture sequence per challenge, each gesture bound to the matching face in the same frames, inside a tight time window."],
+  ["Database leak", "Only public keys, argon2id recovery-code hashes, and AES-256-GCM face + gesture templates whose key lives in the bio service, not the web DB."],
+  ["Photo or replayed video at step-up", "Every check asks for the user's own gesture plus one random built-in sign, in random order, each bound to the matching face in the same frames, inside a tight time window. A recording of an earlier check won't have this one's sign in this order."],
   ["Spliced video (face + hand from different clips)", "Face-embedding continuity check plus gesture/face co-presence in the same frames."],
   ["Stolen unlocked device", "Each passkey still needs the device's own biometric or PIN (user verification required). Revoke it from another device or an admin."],
   ["Lost device", "Revoking its credential kills its sessions; recovery issues a new passkey and revokes all the old ones."],
@@ -29,6 +29,7 @@ const covered: [string, string][] = [
 
 const partial: [string, string][] = [
   ["Real-time deepfake via a virtual camera", "Random prompts and hand-near-face raise the bar but don't close it. Liveness never stands alone: a passkey (or recovery code) is always required first."],
+  ["Someone who has watched the user's gesture", "The gesture is a personal factor, not a secret against anyone who has seen a check: they still need the user's face live, the random sign and the passkey first. Only 14 sign orders exist, so the random part is a speed bump, not a vault."],
   ["Victim tricked into reading out their code and doing liveness", "The cooldown, alerts and cancel button let the real owner stop it — as long as they still hold one signed-in device."],
   ["User who lost every device", "Recovery still works via the code, but no device is left to receive the alert. Out-of-band (email) alerts are a stretch goal."],
   ["Basic-phone / low-literacy users", "Security key, NFC card, or a phone-as-key over the hybrid QR flow, plus voice prompts on every screen. No IVR / USSD path."],

@@ -11,7 +11,7 @@ SQLite at `web/data/app.db`, Drizzle schema in `web/src/server/db/schema.ts` (im
 | handle | unique, `^[a-z0-9_]{3,32}$` |
 | display_name | |
 | webauthn_user_id | 32 random bytes as base64url text. WebAuthn `user.id`, never the handle. |
-| face_template_enc | base64 text, null if not enrolled. Opaque, from bio. |
+| face_template_enc | base64 text, null if not enrolled. Opaque, from bio. Holds the face embedding AND the custom gesture template (one blob, enrolled together; see `docs/biometrics.md#bio-api`). |
 
 Admin role is not stored: `ADMIN_HANDLES` env decides.
 

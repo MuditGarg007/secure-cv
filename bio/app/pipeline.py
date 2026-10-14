@@ -11,10 +11,30 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from app.config import ANALYZE_MIN_GAP_MS, DET_MODEL, GESTURE_MODEL, MULTI_FACE_MIN_PX, REC_MODEL
-from app.decision import Decision, EnrollFrame, FrameResult, decide, enroll_reason, select_frames
+from app.config import (
+    ANALYZE_MIN_GAP_MS,
+    DET_MODEL,
+    ENROLL_FRAMES,
+    GESTURE_MODEL,
+    MULTI_FACE_MIN_PX,
+    REC_MODEL,
+)
+from app.crypto import BioTemplate
+from app.decision import (
+    Decision,
+    EnrollFrame,
+    FrameResult,
+    decide,
+    enroll_pose,
+    enroll_reason,
+    select_frames,
+)
 from app.face import Detector, Embedder, Face, align
 from app.gesture import GestureTracker, Hand
+from app.handpose import nearest
+
+# Pseudo timestamps for the gesture enrollment frames (the tracker needs increasing times).
+ENROLL_FRAME_STEP_MS = 250
 
 
 class Models:
@@ -49,16 +69,16 @@ def mean_template(embs: np.ndarray) -> np.ndarray:
 @dataclass(frozen=True)
 class EnrollOutcome:
     reason: str | None
-    template: np.ndarray | None
+    template: BioTemplate | None
 
 
-def enroll(models: Models, frames: Sequence[bytes]) -> EnrollOutcome:
+def _enroll_face(models: Models, frames: Sequence[bytes]) -> tuple[str | None, np.ndarray | None]:
     rows: list[EnrollFrame] = []
     crops: list[np.ndarray] = []
     for data in frames:
         img = decode_jpeg(data)
         if img is None:
-            return EnrollOutcome("low_quality", None)
+            return "low_quality", None
         faces = models.faces(img)
         rows.append(EnrollFrame(faces=len(faces), face_px=faces[0].width if len(faces) == 1 else 0.0))
         if len(faces) == 1:
@@ -66,9 +86,23 @@ def enroll(models: Models, frames: Sequence[bytes]) -> EnrollOutcome:
     embs = models.embedder.embed(crops)
     pair_sims = [float(embs[i] @ embs[j]) for i in range(len(embs)) for j in range(i + 1, len(embs))]
     reason = enroll_reason(rows, pair_sims)
-    if reason:
-        return EnrollOutcome(reason, None)
-    return EnrollOutcome(None, mean_template(embs))
+    return (reason, None) if reason else (None, mean_template(embs))
+
+
+def enroll(models: Models, frames: Sequence[bytes]) -> EnrollOutcome:
+    """First ENROLL_FRAMES frames: face photos. The rest: the custom hand shape, in captures."""
+    reason, face = _enroll_face(models, frames[:ENROLL_FRAMES])
+    if reason or face is None:
+        return EnrollOutcome(reason or "low_quality", None)
+
+    imgs = [decode_jpeg(d) for d in frames[ENROLL_FRAMES:]]
+    if any(img is None for img in imgs):
+        return EnrollOutcome("low_quality", None)
+    hands = _gesture_pass(models, imgs, [i * ENROLL_FRAME_STEP_MS for i in range(len(imgs))])
+    pose = enroll_pose([[h.features for h in fs if h.features is not None] for fs in hands])
+    if pose.reason or pose.samples is None or pose.tau is None:
+        return EnrollOutcome(pose.reason or "no_hand", None)
+    return EnrollOutcome(None, BioTemplate(face=face, pose=pose.samples, pose_tau=pose.tau))
 
 
 def _face_pass(models: Models, imgs: list[np.ndarray | None]) -> tuple[list[list[Face]], dict[int, np.ndarray]]:
@@ -87,7 +121,7 @@ def _gesture_pass(models: Models, imgs: list[np.ndarray | None], ts: Sequence[fl
 
 
 def analyze(
-    models: Models, frames: Sequence[bytes], timestamps: Sequence[float], template: np.ndarray
+    models: Models, frames: Sequence[bytes], timestamps: Sequence[float], template: BioTemplate
 ) -> list[FrameResult]:
     imgs = [decode_jpeg(d) for d in frames]
     with ThreadPoolExecutor(max_workers=2) as ex:
@@ -102,15 +136,20 @@ def analyze(
         face_sim = prev_sim = hand_dist = None
         emb = embs.get(i)
         if emb is not None:
-            face_sim = float(emb @ template)
+            face_sim = float(emb @ template.face)
             prev_sim = float(emb @ prev) if prev is not None else None
             prev = emb
         recognised = [h for h in hands[i] if h.gesture]
         best = max(recognised, key=lambda h: h.score, default=None)
-        if best and emb is not None:
+        shaped = [(nearest(h.features, template.pose), h) for h in hands[i] if h.features is not None]
+        pose_dist, pose_hand = min(shaped, key=lambda x: x[0], default=(None, None))
+        pose_hand_dist = None
+        if emb is not None:
             face = faces[i][0]
-            cx, cy = face.center
-            hand_dist = float(np.hypot(best.center[0] - cx, best.center[1] - cy)) / max(face.width, 1.0)
+            if best:
+                hand_dist = _face_widths(best, face)
+            if pose_hand:
+                pose_hand_dist = _face_widths(pose_hand, face)
         rows.append(
             FrameResult(
                 t_ms=float(t),
@@ -120,16 +159,24 @@ def analyze(
                 gesture=best.gesture if best else None,
                 gesture_score=best.score if best else 0.0,
                 hand_dist=hand_dist,
+                hands=len(hands[i]),
+                pose_dist=pose_dist,
+                pose_hand_dist=pose_hand_dist,
             )
         )
     return rows
+
+
+def _face_widths(hand: Hand, face: Face) -> float:
+    cx, cy = face.center
+    return float(np.hypot(hand.center[0] - cx, hand.center[1] - cy)) / max(face.width, 1.0)
 
 
 def verify(
     models: Models,
     frames: Sequence[bytes],
     timestamps: Sequence[float],
-    template: np.ndarray,
+    template: BioTemplate,
     prompts: Sequence[str],
     *,
     now_ms: float,
@@ -137,4 +184,6 @@ def verify(
 ) -> Decision:
     picked = select_frames(timestamps, ANALYZE_MIN_GAP_MS)
     rows = analyze(models, [frames[i] for i in picked], [timestamps[i] for i in picked], template)
-    return decide(rows, prompts, now_ms=now_ms, expires_at_ms=expires_at_ms, timestamps=timestamps)
+    return decide(
+        rows, prompts, now_ms=now_ms, expires_at_ms=expires_at_ms, timestamps=timestamps, pose_tau=template.pose_tau
+    )

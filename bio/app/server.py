@@ -15,9 +15,10 @@ from fastapi.concurrency import run_in_threadpool
 from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
 
 from app.config import (
+    CUSTOM_PROMPT,
     DEV_FAKE_TEMPLATE,
-    ENROLL_FRAMES,
     GESTURES,
+    ENROLL_TOTAL_FRAMES,
     MAX_PROMPTS,
     MAX_VERIFY_FRAMES,
     Settings,
@@ -32,7 +33,7 @@ if TYPE_CHECKING:
 
 log = logging.getLogger("uvicorn.error")
 
-Gesture = Literal[GESTURES]  # type: ignore[valid-type]
+Prompt = Literal[(*GESTURES, CUSTOM_PROMPT)]  # type: ignore[valid-type]
 Timestamp = Annotated[float, Field(allow_inf_nan=False)]
 
 
@@ -45,8 +46,8 @@ class EnrollMeta(BaseModel):
 class VerifyMeta(BaseModel):
     model_config = ConfigDict(extra="forbid")
     userId: str = Field(min_length=1, max_length=64)
-    templateEnc: str = Field(min_length=1, max_length=8_000)
-    prompts: list[Gesture] = Field(min_length=1, max_length=MAX_PROMPTS)
+    templateEnc: str = Field(min_length=1, max_length=12_000)  # v2 blob is ~8 KB base64
+    prompts: list[Prompt] = Field(min_length=1, max_length=MAX_PROMPTS)
     expiresAt: AwareDatetime
     timestamps: list[Timestamp] = Field(min_length=1, max_length=MAX_VERIFY_FRAMES)
     fake: str | None = Field(default=None, max_length=40)
@@ -92,9 +93,9 @@ def create_app(settings: Settings | None = None, models: "Models | None" = None)
 
     @app.post("/enroll")
     async def enroll(request: Request) -> dict:
-        meta, frames = await read_upload(request, EnrollMeta, max_frames=ENROLL_FRAMES)
-        if len(frames) != ENROLL_FRAMES:
-            raise HTTPException(400, f"need exactly {ENROLL_FRAMES} frames")
+        meta, frames = await read_upload(request, EnrollMeta, max_frames=ENROLL_TOTAL_FRAMES)
+        if len(frames) != ENROLL_TOTAL_FRAMES:
+            raise HTTPException(400, f"need exactly {ENROLL_TOTAL_FRAMES} frames")
         if settings.BIO_FAKE:
             reason = parse_fake(meta.fake, ENROLL_REASONS)
             template = None if reason else fake_template()

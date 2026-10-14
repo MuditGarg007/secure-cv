@@ -71,7 +71,7 @@ def test_live_capture_passes():
 
 def test_scores_are_json_numbers():
     d = run(capture())
-    assert set(d.scores) == {"faceSim", "presence", "continuityMin", "promptsMatched", "frames", "spanMs"}
+    assert set(d.scores) == {"faceSim", "presence", "continuityMin", "promptsMatched", "poseDistMin", "frames", "spanMs"}
     assert d.to_json()["passed"] is True
 
 
@@ -314,3 +314,114 @@ def test_enroll_two_people_rejected():
 
 def test_enroll_wrong_frame_count():
     assert enroll_reason(good_enroll()[:4], SIMS_OK) == "low_quality"
+
+
+# ---- custom gesture (the user's own hand shape) + one random canned sign ----
+TAU = 0.25
+MIXED = ["Custom", "Victory"]
+
+
+def mixed_capture(prompts=MIXED, n=80, step=100, react_ms=800) -> list[FrameResult]:
+    """Live capture for a custom + canned challenge: the custom shape is close to the template and
+    MediaPipe labels it as no canned class; the canned sign is far from the template."""
+    slot = n * step / len(prompts)
+    frames = []
+    for k in range(n):
+        t = k * step
+        idx = min(int(t // slot), len(prompts) - 1)
+        shown = t - idx * slot >= react_ms
+        custom = shown and prompts[idx] == "Custom"
+        canned = shown and not custom
+        frames.append(
+            FrameResult(
+                t_ms=t,
+                faces=1,
+                face_sim=0.7,
+                prev_sim=0.95 if k else None,
+                gesture=prompts[idx] if canned else None,
+                gesture_score=0.9 if canned else 0.0,
+                hand_dist=1.2 if canned else None,
+                hands=1 if shown else 0,
+                pose_dist=0.1 if custom else (0.8 if canned else None),
+                pose_hand_dist=1.2 if shown else None,
+            )
+        )
+    return frames
+
+
+def run_mixed(frames, prompts=MIXED, tau=TAU, **kw):
+    return decide(frames, prompts, now_ms=NOW, expires_at_ms=EXPIRES, pose_tau=tau, **kw)
+
+
+@pytest.mark.parametrize("prompts", [MIXED, ["Thumb_Up", "Custom"]])
+def test_custom_plus_canned_passes(prompts):
+    d = run_mixed(mixed_capture(prompts), prompts)
+    assert d.passed, d.reasons
+    assert d.scores["promptsMatched"] == 2
+    assert d.scores["poseDistMin"] == 0.1
+
+
+def test_custom_wrong_shape_is_gesture_mismatch():
+    frames = edit(mixed_capture(), lambda i, f: f.pose_dist == 0.1, pose_dist=TAU + 0.05)
+    d = run_mixed(frames)
+    assert d.reasons == ["gesture_mismatch"]
+    assert d.scores["promptsMatched"] == 0
+
+
+def test_custom_threshold_boundary():
+    at = edit(mixed_capture(), lambda i, f: f.pose_dist == 0.1, pose_dist=TAU)
+    assert run_mixed(at).passed
+
+
+def test_no_hand_at_all_is_prompt_missing():
+    frames = edit(mixed_capture(), lambda i, f: True, hands=0, pose_dist=None, pose_hand_dist=None, gesture=None, gesture_score=0.0)
+    assert run_mixed(frames).reasons == ["prompt_missing"]
+
+
+def test_canned_step_failing_is_prompt_missing():
+    frames = edit(mixed_capture(), lambda i, f: f.gesture == "Victory", gesture=None, gesture_score=0.0)
+    d = run_mixed(frames)
+    assert d.reasons == ["prompt_missing"]
+    assert d.scores["promptsMatched"] == 1
+
+
+def test_custom_needs_template_threshold():
+    assert not run_mixed(mixed_capture(), tau=None).passed
+
+
+def test_custom_wrong_order_fails():
+    frames = mixed_capture(["Victory", "Custom"])
+    assert match_prompts(frames, MIXED, pose_tau=TAU) == 1
+
+
+def test_custom_bound_to_face():
+    frames = edit(mixed_capture(), lambda i, f: f.pose_dist == 0.1, face_sim=0.1)
+    assert not run_mixed(frames).passed
+
+
+def test_custom_hand_far_from_face_does_not_count():
+    frames = edit(mixed_capture(), lambda i, f: f.pose_dist == 0.1, pose_hand_dist=HAND_FACE_MAX_DIST + 1)
+    assert "gesture_mismatch" in run_mixed(frames).reasons
+
+
+def test_one_held_shape_does_not_satisfy_two_steps():
+    # Custom shape that MediaPipe also labels Victory, held without a break: it must not count
+    # for both steps. A replayed clip of the custom shape alone would otherwise pass.
+    frames = [
+        FrameResult(
+            t_ms=i * 100,
+            faces=1,
+            face_sim=0.7,
+            gesture="Victory",
+            gesture_score=0.9,
+            hand_dist=1.0,
+            hands=1,
+            pose_dist=0.1,
+            pose_hand_dist=1.0,
+        )
+        for i in range(60)
+    ]
+    assert match_prompts(frames, MIXED, pose_tau=TAU) == 1
+    # Lowering the hand in between (release) and showing it again satisfies both.
+    released = edit(frames, lambda i, f: 25 <= i < 30, gesture=None, gesture_score=0.0, hands=0, pose_dist=None)
+    assert match_prompts(released, MIXED, pose_tau=TAU) == 2

@@ -3,6 +3,7 @@ import {
   carriedAttempts,
   countryLabel,
   enrollHint,
+  enrollStep,
   hintFromReasons,
   stepUpReasonText,
   validTimestamps,
@@ -17,6 +18,7 @@ describe("hintFromReasons", () => {
     [["face_mismatch"], "try_again"],
     [["discontinuity"], "try_again"],
     [["template_invalid"], "try_again"],
+    [["gesture_mismatch"], "try_again"],
     [[], "try_again"],
     [["something_new"], "try_again"],
   ])("%j -> %s", (reasons, hint) => {
@@ -26,6 +28,11 @@ describe("hintFromReasons", () => {
   it("never reveals a face mismatch behind a more specific hint", () => {
     expect(hintFromReasons(["prompt_missing", "face_mismatch"])).toBe("try_again");
     expect(hintFromReasons(["no_face", "discontinuity", "timing"])).toBe("try_again");
+  });
+
+  it("never reveals that a shown hand shape was the wrong custom gesture", () => {
+    expect(hintFromReasons(["gesture_mismatch", "no_face"])).toBe("try_again");
+    expect(hintFromReasons(["gesture_mismatch", "timing"])).toBe("try_again");
   });
 
   it("prefers too_slow over visibility and gestures", () => {
@@ -41,6 +48,19 @@ describe("enrollHint", () => {
     expect(enrollHint("low_quality")).toBe("low_quality");
     expect(enrollHint("weird")).toBe("low_quality");
     expect(enrollHint(undefined)).toBe("low_quality");
+    expect(enrollHint("no_hand")).toBe("no_hand");
+    expect(enrollHint("multiple_hands")).toBe("multiple_hands");
+    expect(enrollHint("gesture_unstable")).toBe("gesture_unstable");
+  });
+});
+
+describe("enrollStep", () => {
+  it("sends gesture problems back to the gesture step and the rest to the face step", () => {
+    expect(enrollStep("gesture_unstable")).toBe("gesture");
+    expect(enrollStep("no_hand")).toBe("gesture");
+    expect(enrollStep("multiple_hands")).toBe("gesture");
+    expect(enrollStep("no_face")).toBe("face");
+    expect(enrollStep("low_quality")).toBe("face");
   });
 });
 

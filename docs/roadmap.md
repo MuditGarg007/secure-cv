@@ -26,7 +26,8 @@ Milestones M1–M6 are built in parallel by four agents (see `docs/agents/workfl
 - [x] web: camera capture component (frames + timestamps, prompt cards, voice)
 - [x] Sign-up step 3 enrollment, enroll/delete on `/security`
 - [x] Risk check + step-up flow + "Simulate location" toggle
-- [ ] Calibrate thresholds with team captures, record in `docs/biometrics.md#decisions`
+- [x] Custom gesture: user sets their own hand shape at enrollment; checks ask for it + 1 random canned sign (`docs/biometrics.md#custom-gesture`)
+- [ ] Calibrate thresholds with team captures (face + `scripts/calibrate_pose.py` for the custom gesture), record in `docs/biometrics.md#decisions`
 
 ## M3: Devices
 - [x] QR device link (start, approve, register, polling)
@@ -47,7 +48,7 @@ Milestones M1–M6 are built in parallel by four agents (see `docs/agents/workfl
 - [ ] Rehearse demo script
 
 ## Demo script
-1. Sign up, enroll face, save recovery code. Sign in normally.
+1. Sign up, enroll face + your own gesture, save recovery code. Sign in normally.
 2. Simulate new country → step-up. Fail with a photo / phone video, pass live.
 3. Add a laptop by QR, remove the old phone.
 4. Phishing clone: every attack fails.
@@ -55,7 +56,7 @@ Milestones M1–M6 are built in parallel by four agents (see `docs/agents/workfl
 6. Admin: devices, login history, revoked credentials, blocked attempts.
 
 ## Stretch (only if time is left)
-- Anti-spoof model, custom gesture, live in-browser prompt ticking (`docs/biometrics.md#stretch`)
+- Anti-spoof model, moving custom gestures, live in-browser prompt ticking (`docs/biometrics.md#stretch`)
 - Hindi UI strings
 - Email alerts for recovery
 - Playwright e2e with a virtual authenticator

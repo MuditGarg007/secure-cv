@@ -9,27 +9,37 @@ export type BioReason =
   | "face_mismatch"
   | "discontinuity"
   | "prompt_missing"
+  | "gesture_mismatch"
   | "timing"
   | "template_invalid";
 
 /**
  * Coarse hint for the browser (AGENTS.md rule 9). Anything about identity collapses to the
- * vaguest hint so the client never learns whether the face matched.
+ * vaguest hint so the client never learns whether the face matched, or whether a hand shape
+ * shown for the custom gesture was close (no oracle for guessing someone's gesture).
  */
 export function hintFromReasons(reasons: readonly string[]): LivenessHint {
   const has = (r: BioReason) => reasons.includes(r);
-  if (has("face_mismatch") || has("discontinuity") || has("template_invalid")) return "try_again";
+  if (has("face_mismatch") || has("discontinuity") || has("template_invalid") || has("gesture_mismatch")) {
+    return "try_again";
+  }
   if (has("timing")) return "too_slow";
   if (has("no_face") || has("multiple_faces")) return "face_not_visible";
   if (has("prompt_missing")) return "gesture_not_seen";
   return "try_again";
 }
 
-export type EnrollHint = "no_face" | "multiple_faces" | "low_quality";
+const ENROLL_HINTS = ["no_face", "multiple_faces", "low_quality", "no_hand", "multiple_hands", "gesture_unstable"] as const;
+export type EnrollHint = (typeof ENROLL_HINTS)[number];
 
 /** Enrollment failures are shown as-is (the user is signed in and just reauthenticated). */
 export function enrollHint(reason: string | undefined): EnrollHint {
-  return reason === "no_face" || reason === "multiple_faces" ? reason : "low_quality";
+  return ENROLL_HINTS.find((h) => h === reason) ?? "low_quality";
+}
+
+/** Which enrollment step to redo: the face photos, or only the custom gesture captures. */
+export function enrollStep(hint: EnrollHint): "face" | "gesture" {
+  return hint === "no_hand" || hint === "multiple_hands" || hint === "gesture_unstable" ? "gesture" : "face";
 }
 
 /** Frame timestamps: one per frame, finite, starting at >= 0, strictly increasing. */

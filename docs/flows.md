@@ -22,7 +22,7 @@ Every screen: one primary action, big buttons with icon + text, and a 🔊 butto
 ## 1. Sign-up
 1. Handle + display name → `register/options`.
 2. "Your device will ask for your fingerprint, face or screen lock" → `startRegistration` → `register/verify`. Label auto-derived from UA.
-3. Face enrollment (skippable): consent checkbox, camera with face oval, capture 5 frames → `/bio/enroll`. Skip warning: "Without this, unusual sign-ins get blocked and recovery takes 3 days."
+3. Face + gesture enrollment (skippable): consent checkbox, camera with face oval, capture 5 frames; then "pick any hand shape you can repeat", recorded 3 times next to the face (lower the hand in between); one upload → `/bio/enroll`. A gesture problem redoes only the gesture step. Skip warning: "Without this, unusual sign-ins get blocked and recovery takes 3 days."
 4. Recovery code from `/me/recovery-code`, shown as `XXXX-XXXX-XXXX-XXXX-XXXX` + Copy/Print. "I saved it" checkbox required.
 5. → `/home`.
 
@@ -34,8 +34,8 @@ Every screen: one primary action, big buttons with icon + text, and a 🔊 butto
 
 ## 3. Step-up (liveness)
 1. "This sign-in looks unusual (new location). Quick check." Show the reason category only.
-2. `/stepup/challenge` → 3 gesture prompts.
-3. Camera screen: one prompt card at a time (emoji + name + voice), "hold it next to your face", countdown bar.
+2. `/stepup/challenge` → 2 prompts: the user's own gesture and one random canned gesture, random order.
+3. Camera screen: one prompt card at a time (emoji + name + voice; the custom one reads "Your own gesture"), "hold it next to your face, lower your hand in between", countdown bar.
 4. Auto-submit at end of window → `/stepup/verify`.
 5. Pass → `/home`, notification "New sign-in from <country>" for the user. Fail → hint + retry. 0 attempts left → sign out.
 
@@ -85,7 +85,7 @@ One pure function `transition(request, event, now, cfg)` in `server/recovery/mac
 ## 7. Account pages
 - `/home`: unread notifications, last sign-in time + country, open recovery banner with Cancel.
 - `/activity`: event list with icons ✓ allowed, ⚠ step-up, ⛔ blocked.
-- `/security`: enroll / re-enroll / delete face, regenerate recovery code.
+- `/security`: enroll / re-enroll / delete face + gesture, regenerate recovery code.
 
 ## 8. Admin
 Server-rendered, read straight from DB:

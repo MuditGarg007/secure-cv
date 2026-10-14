@@ -22,7 +22,7 @@ import { CAPTURE_COUNTDOWN_MS } from "@/server/config";
 import type { LivenessChallengeDTO, LivenessHint } from "@/server/bio/liveness";
 import { CameraView } from "./CameraView";
 import { DevFakePicker } from "./DevFakePicker";
-import { cameraErrorText, GESTURE_UI, LIVENESS_HINT_TEXT } from "./gestures";
+import { cameraErrorText, LIVENESS_HINT_TEXT, PROMPT_UI } from "./gestures";
 import { useBioStatus } from "./useBioStatus";
 
 export type LivenessCheckProps = {
@@ -48,7 +48,14 @@ type Phase =
   | { kind: "passed" }
   | { kind: "final"; message: string };
 
-const FAKE_OPTIONS = ["pass", "fail:prompt_missing", "fail:no_face", "fail:face_mismatch", "fail:timing"] as const;
+const FAKE_OPTIONS = [
+  "pass",
+  "fail:prompt_missing",
+  "fail:gesture_mismatch",
+  "fail:no_face",
+  "fail:face_mismatch",
+  "fail:timing",
+] as const;
 
 // Errors after which retrying can't help: the caller decides what happens next.
 const FINAL_CODES = new Set([
@@ -133,8 +140,8 @@ export function LivenessCheck({ challengeUrl, verifyUrl, onPassed, onFailedFinal
     try {
       await ensureCamera();
       const challenge = await api<LivenessChallengeDTO>(challengeUrl, { method: "POST" });
-      const first = GESTURE_UI[challenge.prompts[0]];
-      speak(`Get ready. Hold each hand sign next to your face. First: ${first.say}.`);
+      const first = PROMPT_UI[challenge.prompts[0]];
+      speak(`Get ready. Hold each sign next to your face, and lower your hand in between. First: ${first.say}.`);
       for (let left = Math.ceil(CAPTURE_COUNTDOWN_MS / 1000); left > 0; left--) {
         setPhase({ kind: "countdown", challenge, left });
         await sleep(1000, ac.signal);
@@ -153,7 +160,7 @@ export function LivenessCheck({ challengeUrl, verifyUrl, onPassed, onFailedFinal
           const index = Math.min(challenge.prompts.length - 1, Math.floor(elapsed / slot));
           if (index !== shown) {
             shown = index;
-            speak(GESTURE_UI[challenge.prompts[index]].say);
+            speak(PROMPT_UI[challenge.prompts[index]].say);
           }
           setPhase({ kind: "capturing", challenge, index, progress: Math.min(1, elapsed / challenge.captureWindowMs) });
         },
@@ -208,16 +215,19 @@ export function LivenessCheck({ challengeUrl, verifyUrl, onPassed, onFailedFinal
   const busy = phase.kind === "starting" || phase.kind === "countdown" || phase.kind === "capturing";
   const prompt =
     phase.kind === "countdown"
-      ? { g: GESTURE_UI[phase.challenge.prompts[0]], step: 1, of: phase.challenge.prompts.length }
+      ? { g: PROMPT_UI[phase.challenge.prompts[0]], step: 1, of: phase.challenge.prompts.length }
       : phase.kind === "capturing"
-        ? { g: GESTURE_UI[phase.challenge.prompts[phase.index]], step: phase.index + 1, of: phase.challenge.prompts.length }
+        ? { g: PROMPT_UI[phase.challenge.prompts[phase.index]], step: phase.index + 1, of: phase.challenge.prompts.length }
         : null;
 
   return (
     <div className="flex flex-col gap-4">
       {phase.kind === "intro" && (
         <div className="flex flex-col gap-2 text-sm">
-          <p>You&apos;ll see 3 hand signs, one at a time. Show each one next to your face until the next appears.</p>
+          <p>
+            You&apos;ll be asked for two signs, one at a time: your own gesture and one we pick. Show each one next to
+            your face until the next appears, and lower your hand in between.
+          </p>
           <p className="text-muted-foreground">Takes about 15 seconds. Use good light and keep only your face in view.</p>
         </div>
       )}

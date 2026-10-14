@@ -30,7 +30,10 @@ export const GESTURES = [
   "Victory",
   "ILoveYou",
 ] as const;
-export const PROMPT_COUNT = 3;
+// The user's own enrolled hand shape (bio CUSTOM_PROMPT). Every challenge = this + CANNED_PROMPT_COUNT
+// random GESTURES, in random order (docs/biometrics.md#gesture-prompts).
+export const CUSTOM_GESTURE = "Custom";
+export const CANNED_PROMPT_COUNT = 1;
 export const LIVENESS_CHALLENGE_TTL_MS = 120 * 1000;
 export const LIVENESS_CAPTURE_WINDOW_MS = 8 * 1000;
 export const LIVENESS_MAX_ATTEMPTS = 3;
@@ -45,6 +48,13 @@ export const CAPTURE_JPEG_QUALITY = 0.7;
 export const CAPTURE_COUNTDOWN_MS = 3 * 1000; // "get ready" before the capture window starts
 export const ENROLL_FRAME_INTERVAL_MS = 300; // spacing between the 5 enrollment frames
 export const BIO_STATUS_CACHE_MS = 10 * 1000; // how long web trusts bio's /healthz fake flag
+// Custom gesture enrollment: 3 captures of 5 frames, the user lowers the hand in between.
+export const GESTURE_ENROLL_CAPTURES = 3;
+export const GESTURE_ENROLL_FRAMES_PER_CAPTURE = 5;
+export const GESTURE_ENROLL_FRAME_COUNT = GESTURE_ENROLL_CAPTURES * GESTURE_ENROLL_FRAMES_PER_CAPTURE;
+export const GESTURE_ENROLL_FRAME_INTERVAL_MS = 250;
+export const GESTURE_ENROLL_READY_MS = 2 * 1000; // "show your gesture" before each capture
+export const GESTURE_ENROLL_REST_MS = 1500; // "lower your hand" between captures
 // ===== end bio =====
 
 // ===== devices + admin (agent C) =====

@@ -8,20 +8,31 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from statistics import median
 
+import numpy as np
+
 from app.config import (
     CAPTURE_WINDOW_MS,
     CONTINUITY_MIN,
+    CUSTOM_PROMPT,
     ENROLL_CONSISTENCY_MIN,
     ENROLL_FRAMES,
     ENROLL_MIN_FACE_PX,
     FACE_PRESENCE_MIN,
     FACE_SIM_THRESHOLD,
+    GESTURE_ENROLL_CAPTURES,
+    GESTURE_ENROLL_FRAMES_PER_CAPTURE,
+    GESTURE_ENROLL_MIN_PER_CAPTURE,
     GESTURE_HOLD_MS,
     GESTURE_MAX_GAP_MS,
     GESTURE_SCORE_MIN,
     HAND_FACE_MAX_DIST,
+    POSE_ENROLL_MAX_SPREAD,
+    POSE_TAU_MARGIN,
+    POSE_TAU_MAX,
+    POSE_TAU_MIN,
     TIMING_SLACK_MS,
 )
+from app.handpose import cross_capture_nn
 
 # Verify reason codes, in the order of the decision table.
 VERIFY_REASONS = (
@@ -30,11 +41,14 @@ VERIFY_REASONS = (
     "face_mismatch",
     "discontinuity",
     "prompt_missing",
+    "gesture_mismatch",
     "timing",
 )
 # Extra verify reason when the stored template can't be decrypted for this user.
 TEMPLATE_INVALID = "template_invalid"
-ENROLL_REASONS = ("no_face", "multiple_faces", "low_quality")
+FACE_ENROLL_REASONS = ("no_face", "multiple_faces", "low_quality")
+GESTURE_ENROLL_REASONS = ("no_hand", "multiple_hands", "gesture_unstable")
+ENROLL_REASONS = FACE_ENROLL_REASONS + GESTURE_ENROLL_REASONS
 
 
 @dataclass(frozen=True)
@@ -45,9 +59,12 @@ class FrameResult:
     faces: int = 0  # faces detected (tiny background detections excluded)
     face_sim: float | None = None  # single face vs enrolled template (cosine)
     prev_sim: float | None = None  # single face vs the previous frame's face (cosine)
-    gesture: str | None = None  # best recognised gesture, None if none
+    gesture: str | None = None  # best recognised canned gesture, None if none
     gesture_score: float = 0.0
-    hand_dist: float | None = None  # hand centre to face centre, in face widths
+    hand_dist: float | None = None  # that hand's centre to face centre, in face widths
+    hands: int = 0  # hands detected
+    pose_dist: float | None = None  # closest hand vs the enrolled custom shape (handpose.nearest)
+    pose_hand_dist: float | None = None  # that hand's centre to face centre, in face widths
 
 
 @dataclass(frozen=True)
@@ -83,12 +100,14 @@ def decide(
     now_ms: float,
     expires_at_ms: float,
     timestamps: Sequence[float] | None = None,
+    pose_tau: float | None = None,
     th: Thresholds = DEFAULT_THRESHOLDS,
 ) -> Decision:
     """Pass only if every row of the decision table holds. Reasons list every failed row.
 
     `frames` may be a subset of the upload (see select_frames); `timestamps` are then ALL the
-    uploaded timestamps, so the timing row still covers every frame.
+    uploaded timestamps, so the timing row still covers every frame. `pose_tau` is the user's
+    custom-shape threshold from the template (needed when `prompts` contains CUSTOM_PROMPT).
     """
     reasons: list[str] = []
     n = len(frames)
@@ -111,9 +130,13 @@ def decide(
     if continuity_min is not None and continuity_min < th.continuity:
         reasons.append("discontinuity")
 
-    matched = match_prompts(frames, prompts, th)
+    matched = match_prompts(frames, prompts, th, pose_tau=pose_tau)
     if matched < len(prompts):
-        reasons.append("prompt_missing")
+        # The custom shape failing while a hand was in view is reported apart, so web can give
+        # the vague hint: the client must not learn how close a guessed shape was.
+        custom_seen = prompts[matched] == CUSTOM_PROMPT and any(f.hands for f in frames)
+        reasons.append("gesture_mismatch" if custom_seen else "prompt_missing")
+    pose_dists = [f.pose_dist for f in frames if f.pose_dist is not None]
 
     ts = list(timestamps) if timestamps is not None else [f.t_ms for f in frames]
     if not timing_ok(ts, now_ms=now_ms, expires_at_ms=expires_at_ms, th=th):
@@ -127,6 +150,7 @@ def decide(
             "presence": _r(presence),
             "continuityMin": _r(continuity_min),
             "promptsMatched": matched,
+            "poseDistMin": _r(min(pose_dists)) if pose_dists else None,
             "frames": n,
             "spanMs": round(ts[-1] - ts[0]) if ts else 0,
         },
@@ -137,33 +161,56 @@ def _r(x: float | None) -> float | None:
     return None if x is None else round(float(x), 3)
 
 
-def _bound(f: FrameResult, prompt: str, th: Thresholds) -> bool:
-    """Frame shows `prompt` confidently AND the matching face, with the hand near that face."""
+def _shows(f: FrameResult, prompt: str, th: Thresholds, pose_tau: float | None) -> bool:
+    """Frame shows `prompt` (the hand alone, face not considered)."""
+    if prompt == CUSTOM_PROMPT:
+        return pose_tau is not None and f.pose_dist is not None and f.pose_dist <= pose_tau
+    return f.gesture == prompt and f.gesture_score >= th.gesture_score
+
+
+def _bound(f: FrameResult, prompt: str, th: Thresholds, pose_tau: float | None) -> bool:
+    """Frame shows `prompt` AND the matching face, with that hand near the face."""
+    dist = f.pose_hand_dist if prompt == CUSTOM_PROMPT else f.hand_dist
     return (
-        f.gesture == prompt
-        and f.gesture_score >= th.gesture_score
+        _shows(f, prompt, th, pose_tau)
         and f.faces == 1
         and f.face_sim is not None
         and f.face_sim >= th.face_sim
-        and (f.hand_dist is None or f.hand_dist <= th.hand_face_max_dist)
+        and (dist is None or dist <= th.hand_face_max_dist)
     )
 
 
-def match_prompts(frames: Sequence[FrameResult], prompts: Sequence[str], th: Thresholds = DEFAULT_THRESHOLDS) -> int:
-    """How many prompts were held long enough, in order. Each search starts after the previous hold."""
+def match_prompts(
+    frames: Sequence[FrameResult],
+    prompts: Sequence[str],
+    th: Thresholds = DEFAULT_THRESHOLDS,
+    *,
+    pose_tau: float | None = None,
+) -> int:
+    """How many prompts were held long enough, in order. Each search starts after the previous hold.
+
+    A step's hold can only start once the hand has stopped showing the previous step's sign, so
+    one held shape never counts twice (matters when the custom shape looks like the canned one).
+    """
     i = 0
     for k, prompt in enumerate(prompts):
+        prev = prompts[k - 1] if k else None
+        released = prev is None
         start = last = None
         while i < len(frames):
             f = frames[i]
             i += 1
-            if _bound(f, prompt, th):
+            if not released:
+                if _shows(f, prev, th, pose_tau):
+                    continue
+                released = True
+            if _bound(f, prompt, th, pose_tau):
                 if start is None or f.t_ms - last > th.max_gap_ms:
                     start = f.t_ms
                 last = f.t_ms
                 if last - start >= th.hold_ms:
                     break
-            elif f.gesture not in (None, prompt) and f.gesture_score >= th.gesture_score:
+            elif prompt != CUSTOM_PROMPT and f.gesture not in (None, prompt) and f.gesture_score >= th.gesture_score:
                 start = None  # a different confident gesture breaks the hold
         else:
             return k
@@ -216,3 +263,46 @@ def enroll_reason(
     if pair_sims and min(pair_sims) < ENROLL_CONSISTENCY_MIN:
         return "low_quality"  # not the same person in every frame
     return None
+
+
+@dataclass(frozen=True)
+class PoseEnrollment:
+    reason: str | None  # one of GESTURE_ENROLL_REASONS, None if usable
+    samples: np.ndarray | None = None  # (k, 66) feature vectors kept as the template
+    tau: float | None = None  # per-user match threshold
+    spread: float | None = None  # median cross-capture distance (for logs/calibration)
+
+
+def enroll_pose(
+    hands_per_frame: Sequence[Sequence[np.ndarray]],
+    *,
+    captures: int = GESTURE_ENROLL_CAPTURES,
+    per_capture: int = GESTURE_ENROLL_FRAMES_PER_CAPTURE,
+) -> PoseEnrollment:
+    """Custom hand-shape template from the gesture enrollment frames.
+
+    `hands_per_frame[i]` = feature vectors of every hand seen in frame i; frames come in
+    `captures` groups of `per_capture` (the user lowers the hand between groups). Each group
+    needs GESTURE_ENROLL_MIN_PER_CAPTURE frames with exactly one hand. The threshold is the 90th
+    percentile cross-capture distance x POSE_TAU_MARGIN, clamped, so a shaky user gets a bit more
+    slack and a steady one a tighter match (percentile, not max: one misread frame shouldn't set it).
+    """
+    if len(hands_per_frame) != captures * per_capture:
+        return PoseEnrollment("no_hand")
+    if any(len(h) >= 2 for h in hands_per_frame):
+        return PoseEnrollment("multiple_hands")
+    samples: list[np.ndarray] = []
+    groups: list[int] = []
+    for g in range(captures):
+        got = [h[0] for h in hands_per_frame[g * per_capture : (g + 1) * per_capture] if len(h) == 1]
+        if len(got) < GESTURE_ENROLL_MIN_PER_CAPTURE:
+            return PoseEnrollment("no_hand")
+        samples += got
+        groups += [g] * len(got)
+    arr = np.stack(samples).astype(np.float32)
+    nn = cross_capture_nn(arr, groups)
+    spread = float(median(nn))
+    if spread > POSE_ENROLL_MAX_SPREAD:
+        return PoseEnrollment("gesture_unstable", spread=spread)
+    tau = min(POSE_TAU_MAX, max(POSE_TAU_MIN, float(np.percentile(nn, 90)) * POSE_TAU_MARGIN))
+    return PoseEnrollment(None, samples=arr, tau=tau, spread=spread)

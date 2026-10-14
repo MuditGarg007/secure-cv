@@ -1,4 +1,5 @@
-"""Hand gesture recognition with MediaPipe Tasks GestureRecognizer (canned classes)."""
+"""Hand tracking with MediaPipe Tasks GestureRecognizer: the canned class (for the random prompt)
+plus the 3D landmarks of every hand, turned into custom-shape features (handpose.py)."""
 
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,7 @@ from app.config import (
     HAND_TRACKING_MIN,
     MAX_HANDS,
 )
+from app.handpose import pose_features
 
 
 @dataclass(frozen=True)
@@ -21,6 +23,7 @@ class Hand:
     gesture: str | None  # one of GESTURES, or None when unrecognised
     score: float
     center: tuple[float, float]  # pixels
+    features: np.ndarray | None = None  # handpose.pose_features of the world landmarks
 
 
 class GestureTracker:
@@ -51,10 +54,11 @@ class GestureTracker:
         res = self._rec.recognize_for_video(mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb), ts)
         h, w = rgb.shape[:2]
         out: list[Hand] = []
-        for cats, lms in zip(res.gestures, res.hand_landmarks):
+        for cats, lms, world in zip(res.gestures, res.hand_landmarks, res.hand_world_landmarks):
             top = cats[0] if cats else None
             name = top.category_name if top and top.category_name in GESTURES else None
             cx = float(np.mean([p.x for p in lms])) * w
             cy = float(np.mean([p.y for p in lms])) * h
-            out.append(Hand(gesture=name, score=float(top.score) if name else 0.0, center=(cx, cy)))
+            feats = pose_features(np.array([[p.x, p.y, p.z] for p in world], dtype=np.float32))
+            out.append(Hand(gesture=name, score=float(top.score) if name else 0.0, center=(cx, cy), features=feats))
         return out

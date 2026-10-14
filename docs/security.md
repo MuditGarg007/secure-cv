@@ -28,7 +28,8 @@ So liveness only ever adds assurance on top of a passkey login (step-up) or alon
 | Password reuse, stuffing, breach dumps | No passwords. Server holds only public keys. |
 | SIM swap, OTP interception, OTP social engineering | No OTPs anywhere. |
 | DB leak | Public keys, argon2id code hashes, encrypted templates. |
-| Photo or replayed video at step-up | Random 3-gesture sequence per challenge, gesture bound to the matching face in the same frames, tight time window. |
+| Photo or replayed video at step-up | Each challenge = the user's custom gesture + one random canned gesture in random order (14 sequences), each bound to the matching face in the same frames, tight time window. One held shape can't satisfy both steps (the hand must change in between). |
+| Guessing someone's custom gesture | Wrong shape returns the same `try_again` hint as a face mismatch (no oracle), attempts are limited per user/purpose, and the face + passkey are still needed. Anyone who has watched a check knows the shape: it is a personal factor, not a secret. |
 | Spliced video (face from one clip, hand from another) | Continuity check on face embeddings + gesture/face co-presence. |
 | Stolen unlocked device | Passkey needs device biometric/PIN. Revoke from another device or admin. |
 | Lost device | Revoke flow kills its sessions. |

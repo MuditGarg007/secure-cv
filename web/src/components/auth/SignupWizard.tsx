@@ -176,8 +176,8 @@ export function SignupWizard({ debugRisk }: { debugRisk: boolean }) {
       {step === "face" && (
         <div className="flex flex-col gap-3">
           <p className="text-sm">
-            We check your face and a few hand signs only when a sign-in looks unusual, and to help you recover your
-            account. Your photos are never stored.
+            We check your face and a hand gesture you choose only when a sign-in looks unusual, and to help you recover
+            your account. Your photos are never stored.
           </p>
           <FaceEnrollPanel allowSkip onDone={() => issueCode()} />
         </div>

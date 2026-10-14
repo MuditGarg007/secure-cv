@@ -22,6 +22,8 @@ GESTURES = (
     "Victory",
     "ILoveYou",
 )
+# Prompt meaning "the user's own enrolled hand shape" (same string as web CUSTOM_GESTURE).
+CUSTOM_PROMPT = "Custom"
 
 # ---- verify decision (docs/biometrics.md#verify-decision-bio) ----
 FACE_SIM_THRESHOLD = 0.45  # median cosine similarity to the enrolled template
@@ -40,11 +42,23 @@ ENROLL_FRAMES = 5
 ENROLL_MIN_FACE_PX = 100  # face bbox width
 ENROLL_CONSISTENCY_MIN = 0.6  # every enrollment frame must look like the same person
 
+# ---- custom gesture (handpose.py, docs/biometrics.md#custom-gesture) ----
+GESTURE_ENROLL_CAPTURES = 3  # user makes the shape, lowers the hand, makes it again
+GESTURE_ENROLL_FRAMES_PER_CAPTURE = 5
+GESTURE_ENROLL_FRAMES = GESTURE_ENROLL_CAPTURES * GESTURE_ENROLL_FRAMES_PER_CAPTURE
+GESTURE_ENROLL_MIN_PER_CAPTURE = 3  # frames with exactly one hand needed in each capture
+POSE_ORIENT_WEIGHT = 0.15  # weight of the orientation term in pose_distance
+POSE_TAU_MARGIN = 1.5  # per-user threshold = p90 cross-capture distance x margin...
+POSE_TAU_MIN = 0.2  # ...clamped to [min, max] (palm lengths)
+POSE_TAU_MAX = 0.4
+POSE_ENROLL_MAX_SPREAD = 0.35  # median cross-capture distance above this = shape not repeatable
+
 # ---- input limits ----
 MAX_VERIFY_FRAMES = 80
 MAX_FRAME_BYTES = 300_000
 MAX_META_BYTES = 20_000
 MAX_PROMPTS = 10
+ENROLL_TOTAL_FRAMES = ENROLL_FRAMES + GESTURE_ENROLL_FRAMES  # one /enroll upload: face photos, then hand shape
 
 # ---- face models (InsightFace buffalo_l run directly on onnxruntime) ----
 DET_MODEL = "det_10g.onnx"  # SCRFD-10GF

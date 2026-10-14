@@ -1,7 +1,6 @@
 import "server-only";
 import { and, eq, gt, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import type { GESTURES } from "@/server/config";
 import {
   LIVENESS_CAPTURE_WINDOW_MS,
   LIVENESS_CHALLENGE_TTL_MS,
@@ -12,7 +11,7 @@ import { ApiError } from "@/server/http";
 import { db, schema } from "@/server/db/client";
 import { createChallenge, deleteChallenge, peekChallenge } from "@/server/auth/challenges";
 import { getUserById, hasFace } from "@/server/users";
-import { generatePrompts, parsePrompts } from "@/server/bio/challenge";
+import { generatePrompts, parsePrompts, type Gesture, type Prompt } from "@/server/bio/challenge";
 import { bioVerify } from "@/server/bio/client";
 import { FakeChoice, readFrameForm } from "@/server/bio/form";
 import { carriedAttempts, hintFromReasons, validTimestamps } from "@/server/bio/rules";
@@ -23,14 +22,14 @@ import { carriedAttempts, hintFromReasons, validTimestamps } from "@/server/bio/
 // (change only via the master). Added (optional only): LivenessSubmission.fake.
 // ============================================================================
 
-export type Gesture = (typeof GESTURES)[number];
+export type { Gesture, Prompt };
 export type LivenessPurpose = "stepup_liveness" | "recovery_liveness";
 export type LivenessHint = "face_not_visible" | "gesture_not_seen" | "too_slow" | "try_again";
 
 /** Exactly what the challenge routes return to the browser. */
 export type LivenessChallengeDTO = {
   challengeId: string;
-  prompts: Gesture[];
+  prompts: Prompt[]; // includes CUSTOM_GESTURE ("show your own gesture") exactly once
   expiresAt: string; // ISO
   captureWindowMs: number;
 };
@@ -86,8 +85,9 @@ function sameTarget(userId: string, purpose: LivenessPurpose, targetId: string |
 }
 
 /**
- * New random gesture challenge stored in `challenges` (purpose, userId, targetId = recoveryId
- * for recovery). Throws BIO_NOT_ENROLLED if the user has no face template.
+ * New challenge (the user's custom gesture + a random canned one, random order) stored in
+ * `challenges` (purpose, userId, targetId = recoveryId for recovery). Throws BIO_NOT_ENROLLED if
+ * the user has no biometric template.
  *
  * Replaces any earlier challenge for the same user/purpose/target and inherits its remaining
  * attempts, so asking for fresh prompts never resets the attempt limit. All DB calls are

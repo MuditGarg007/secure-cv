@@ -13,7 +13,7 @@ export default async function StepUpPage() {
   if (!ctx.session.stepUpPending) redirect("/home");
 
   const reason = stepUpReasonText(stepUpOrigin(ctx.session).signals);
-  const intro = `This sign-in looks unusual (${reason}). Quick check: show the hand signs next to your face.`;
+  const intro = `This sign-in looks unusual (${reason}). Quick check: show your gesture and one hand sign next to your face.`;
   return (
     <PageShell title="Quick check" voiceText={intro}>
       <p>
