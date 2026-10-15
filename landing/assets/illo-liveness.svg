@@ -1,0 +1,53 @@
+<svg width="416" height="604" viewBox="0 0 416 604" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<pattern id="dotsb" width="3" height="3" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".55" fill="#F2F2F6" fill-opacity=".38"/></pattern>
+<pattern id="dotsBb" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.5" fill="#D9D9D9"/></pattern>
+<radialGradient id="sphb" cx="36%" cy="30%" r="75%"><stop offset="0" stop-color="#6B6D75"/><stop offset=".45" stop-color="#34353C"/><stop offset="1" stop-color="#131419"/></radialGradient>
+<radialGradient id="glowb" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset=".55" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+<mask id="fadeb"><rect width="100%" height="100%" fill="url(#glowb)"/></mask>
+<filter id="blurb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="100%" height="100%" fill="#131419"/>
+<g transform="translate(0,-42)">
+<g mask="url(#fadeb)" opacity=".12"><circle cx="208" cy="270" r="260" fill="url(#dotsBb)"/></g>
+<ellipse cx="150" cy="236" rx="78" ry="104" fill="url(#dotsb)" fill-opacity=".6" stroke="#63646A" stroke-width=".8" stroke-dasharray="3 3"/>
+<ellipse cx="150" cy="236" rx="58" ry="80" stroke="#63646A" stroke-width=".6"/>
+<ellipse cx="128" cy="214" rx="11" ry="5" stroke="#63646A" stroke-width=".8"/>
+<ellipse cx="172" cy="214" rx="11" ry="5" stroke="#63646A" stroke-width=".8"/>
+<path d="M150 222 L144 256 L156 256 M134 282 Q150 292 166 282" stroke="#63646A" stroke-width=".8"/>
+<path d="M300 372 L272 352 L254 326 L242 302 L232 280" stroke="#63646A" stroke-width=".8"/>
+<path d="M300 372 L286 300 L283 264 L281 240 L280 218" stroke="#63646A" stroke-width=".8"/>
+<path d="M286 300 L306 296 L308 256 L309 230 L310 206" stroke="#63646A" stroke-width=".8"/>
+<path d="M306 296 L324 302 L329 266 L332 243 L334 224" stroke="#63646A" stroke-width=".8"/>
+<path d="M324 302 L340 315 L349 290 L354 273 L358 257" stroke="#63646A" stroke-width=".8"/>
+<path d="M300 372 L340 315" stroke="#63646A" stroke-width=".8"/>
+<path d="M210 246 C 240 250, 250 270, 262 300" stroke="#63646A" stroke-width=".6" stroke-dasharray="2 3"/>
+<circle cx="300" cy="372" r="9" fill="url(#sphb)"/>
+<circle cx="272" cy="352" r="7" fill="url(#sphb)"/>
+<circle cx="254" cy="326" r="5.2" fill="url(#sphb)"/>
+<circle cx="242" cy="302" r="5.2" fill="url(#sphb)"/>
+<circle cx="232" cy="280" r="4.2" fill="url(#sphb)"/>
+<circle cx="286" cy="300" r="7" fill="url(#sphb)"/>
+<circle cx="283" cy="264" r="5.2" fill="url(#sphb)"/>
+<circle cx="281" cy="240" r="5.2" fill="url(#sphb)"/>
+<circle cx="280" cy="218" r="4.2" fill="url(#sphb)"/>
+<circle cx="306" cy="296" r="7" fill="url(#sphb)"/>
+<circle cx="308" cy="256" r="5.2" fill="url(#sphb)"/>
+<circle cx="309" cy="230" r="5.2" fill="url(#sphb)"/>
+<circle cx="310" cy="206" r="4.2" fill="url(#sphb)"/>
+<circle cx="324" cy="302" r="7" fill="url(#sphb)"/>
+<circle cx="329" cy="266" r="5.2" fill="url(#sphb)"/>
+<circle cx="332" cy="243" r="5.2" fill="url(#sphb)"/>
+<circle cx="334" cy="224" r="4.2" fill="url(#sphb)"/>
+<circle cx="340" cy="315" r="7" fill="url(#sphb)"/>
+<circle cx="349" cy="290" r="5.2" fill="url(#sphb)"/>
+<circle cx="354" cy="273" r="5.2" fill="url(#sphb)"/>
+<circle cx="358" cy="257" r="4.2" fill="url(#sphb)"/>
+<circle cx="96" cy="128" r="26" fill="url(#dotsb)" stroke="#63646A" stroke-width=".6"/>
+<ellipse cx="100.0" cy="146.4" rx="14.4" ry="4.8" fill="#000" opacity=".55" filter="url(#blurb)"/><circle cx="96" cy="128" r="16" fill="url(#sphb)"/>
+<circle cx="212" cy="128" r="17" fill="url(#dotsb)" stroke="#63646A" stroke-width=".6"/>
+<ellipse cx="213.75" cy="136.05" rx="6.3" ry="2.1" fill="#000" opacity=".55" filter="url(#blurb)"/><circle cx="212" cy="128" r="7" fill="url(#sphb)"/>
+<circle cx="372" cy="170" r="20" fill="url(#dotsb)" stroke="#63646A" stroke-width=".6"/>
+<ellipse cx="374.5" cy="181.5" rx="9.0" ry="3.0" fill="#000" opacity=".55" filter="url(#blurb)"/><circle cx="372" cy="170" r="10" fill="url(#sphb)"/>
+</g>
+</svg>

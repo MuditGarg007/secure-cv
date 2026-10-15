@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Secure | Passwordless Sign-In</title>
+  <meta name="description" content="Passkeys bound to the real site, face and gesture liveness when a sign-in looks unusual, and account recovery with no weak fallback. No passwords. No OTPs." />
+  <meta name="theme-color" content="#131419" />
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;700&family=Geist+Mono:wght@400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Shared SVG symbols -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="logomark" viewBox="30 30 84 84">
+        <path d="M80 70 L96 60 L104 108 L86 108 Z" fill="var(--logomark-shadow, #636469)" />
+        <path d="M36 36 H58 L48 48 H36 Z" fill="var(--logomark-shadow, #636469)" />
+        <path fill="currentColor" fill-rule="evenodd" d="M72 36a22 22 0 0 1 9.6 41.8L86 108H58l4.4-30.2A22 22 0 0 1 72 36Zm0 13a9 9 0 1 0 0 18a9 9 0 0 0 0-18Z" />
+      </symbol>
+      <symbol id="arrow" viewBox="0 0 24 24">
+        <path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" />
+      </symbol>
+      <symbol id="chevron" viewBox="0 0 12 12">
+        <path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.4" />
+      </symbol>
+      <symbol id="roll-arrow" viewBox="0 0 12 16">
+        <path d="M1 3h7v7M8 3 1 10" fill="none" stroke="currentColor" stroke-width="1.4" />
+      </symbol>
+      <symbol id="ico-home" viewBox="0 0 24 24">
+        <path d="M4 11 12 4l8 7v9h-5v-6H9v6H4z" fill="none" stroke="currentColor" stroke-width="1.5" />
+      </symbol>
+      <symbol id="ico-layers" viewBox="0 0 24 24">
+        <path d="m12 4 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5" fill="none" stroke="currentColor" stroke-width="1.5" />
+      </symbol>
+      <symbol id="ico-shield" viewBox="0 0 24 24">
+        <path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6l-7-3Z M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.5" />
+      </symbol>
+      <symbol id="ico-github" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <!-- Intro curtain -->
+  <div class="curtain" aria-hidden="true"></div>
+
+  <div class="root">
+    <!-- Intro header: word — & — word -->
+    <header class="masthead" data-intro>
+      <div class="masthead__side">
+        <p class="masthead__word masthead__word--left">Passkeys</p>
+        <div class="masthead__rule masthead__rule--left"></div>
+      </div>
+      <span class="masthead__amp" aria-hidden="true">&amp;</span>
+      <div class="masthead__side">
+        <div class="masthead__rule masthead__rule--right"></div>
+        <p class="masthead__word masthead__word--right">Presence</p>
+      </div>
+    </header>
+
+    <!-- Floating nav -->
+    <nav class="nav" aria-label="Main" data-nav>
+      <div class="nav__panel" id="navigation-panel" data-nav-panel>
+        <a class="nav__link" href="#top" aria-current="page">
+          <svg class="nav__link-icon"><use href="#ico-home" /></svg>
+          <span class="nav__link-label">Home</span>
+        </a>
+        <a class="nav__link" href="#how">
+          <svg class="nav__link-icon"><use href="#ico-layers" /></svg>
+          <span class="nav__link-label">How it works</span>
+        </a>
+        <a class="nav__link" href="#threats">
+          <svg class="nav__link-icon"><use href="#ico-shield" /></svg>
+          <span class="nav__link-label">Threats</span>
+        </a>
+      </div>
+      <div class="nav__bar">
+        <div class="nav__left">
+          <button class="nav__burger" type="button" aria-label="Open menu" aria-controls="navigation-panel" data-nav-toggle>
+            <span></span><span></span><span></span>
+          </button>
+          <a class="nav__logo" href="#top" aria-label="Secure">
+            <svg><use href="#logomark" /></svg>
+          </a>
+          <button class="nav__menu" type="button" aria-controls="navigation-panel" aria-expanded="false" data-nav-toggle>
+            <span>Home</span>
+            <svg class="nav__chevron"><use href="#chevron" /></svg>
+          </button>
+        </div>
+        <a class="nav__cta" data-app-href="/signup">
+          <span>Get Started</span>
+          <svg><use href="#arrow" /></svg>
+        </a>
+      </div>
+    </nav>
+
+    <main id="top">
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero__grid" aria-hidden="true">
+          <div class="hero__grid-mask">
+            <div class="hero__grid-inner">
+              <div class="hero__row hero__row--top">
+                <div class="tile" style="--l:0;--w:252"></div>
+                <div class="tile" style="--l:354;--w:252"></div>
+                <div class="tile" style="--l:707;--w:339"></div>
+                <div class="tile" style="--l:1147;--w:252"></div>
+              </div>
+              <div class="hero__row hero__row--mid">
+                <div class="tile" style="--l:0;--w:300"></div>
+                <div class="tile" style="--l:354;--w:252"></div>
+                <div class="tile" style="--l:707;--w:339"></div>
+                <div class="tile" style="--l:1100;--w:299"></div>
+              </div>
+              <div class="hero__row hero__row--bot">
+                <div class="tile" style="--l:60;--w:252"></div>
+                <div class="tile" style="--l:354;--w:340"></div>
+                <div class="tile" style="--l:794;--w:252"></div>
+                <div class="tile" style="--l:1147;--w:252"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="hero__object" data-hero-object>
+          <canvas class="cloud" data-cloud="padlock" data-tone="light" aria-hidden="true"></canvas>
+        </div>
+        <div class="hero__content">
+          <div class="wipe wipe--hero" data-wipe>
+            <h1 class="hero__title"><span class="wipe__text">Nothing to Phish</span></h1>
+            <span class="wipe__bar" aria-hidden="true"></span>
+          </div>
+          <div class="hero__captions">
+            <p class="mono hero__caption">Passwordless sign-in for India's public, education and small-business services</p>
+            <p class="mono hero__caption hero__caption--right">Passkeys log you in. Your face and hand prove it's really you when it matters.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- INTRO STATEMENT -->
+      <section class="intro">
+        <div class="intro__inner">
+          <div class="intro__head">
+            <div class="intro__labels">
+              <p class="mono intro__label">Phishing-Resistant</p>
+              <p class="mono intro__label">Inclusive by Design</p>
+              <p class="mono intro__label">Recoverable</p>
+            </div>
+            <div class="intro__body">
+              <span class="intro__dash" aria-hidden="true"></span>
+              <svg class="intro__mark" aria-hidden="true"><use href="#logomark" /></svg>
+              <p class="intro__text">
+                <span class="wipe wipe--line intro__line--first" data-wipe><span class="wipe__text">Secure replaces passwords and</span><span class="wipe__bar"></span></span>
+                <span class="wipe wipe--line" data-wipe><span class="wipe__text">OTPs with passkeys bound to the real site,</span><span class="wipe__bar"></span></span>
+                <span class="wipe wipe--line" data-wipe><span class="wipe__text">adds a face and gesture check when a</span><span class="wipe__bar"></span></span>
+                <span class="wipe wipe--line" data-wipe><span class="wipe__text">sign-in looks unusual, and gives everyone</span><span class="wipe__bar"></span></span>
+                <span class="wipe wipe--line" data-wipe><span class="wipe__text">a safe way back in.</span><span class="wipe__bar"></span></span>
+              </p>
+            </div>
+          </div>
+          <a class="cta cta--lime" href="#how">
+            <span class="cta__icon"><svg><use href="#logomark" /></svg></span>
+            <span class="cta__label">
+              <span>How It Works</span>
+              <span class="cta__arrows"><svg class="cta__arrow cta__arrow--a"><use href="#arrow" /></svg><svg class="cta__arrow cta__arrow--b"><use href="#arrow" /></svg></span>
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <!-- HOW IT WORKS (cards) -->
+      <section class="layers" id="how">
+        <div class="layers__inner">
+          <h2 class="layers__title">
+            <span class="wipe wipe--line" data-wipe><span class="wipe__text">Three Layers,</span><span class="wipe__bar"></span></span>
+            <span class="wipe wipe--line" data-wipe><span class="wipe__text">Zero Secrets</span><span class="wipe__bar"></span></span>
+          </h2>
+          <div class="layers__grid">
+            <article class="card">
+              <div class="card__art"><img src="assets/illo-passkey.svg" alt="" /></div>
+              <div class="card__body">
+                <img class="card__rule" src="assets/card-rule.svg" alt="" />
+                <h3 class="card__title">The key never leaves your device.</h3>
+                <p class="card__text">Passkeys are FIDO2/WebAuthn keys locked to your phone, laptop or security key, and to this exact website. We only ever store a public key.
+
+A look-alike site gets nothing it can use: the browser refuses to sign for the wrong origin.</p>
+              </div>
+              <div class="card__frame"><img src="assets/card-frame.svg" alt="" /></div>
+            </article>
+            <article class="card">
+              <div class="card__art"><img src="assets/illo-liveness.svg" alt="" /></div>
+              <div class="card__body">
+                <img class="card__rule" src="assets/card-rule.svg" alt="" />
+                <h3 class="card__title">Your face and hand, only when it matters.</h3>
+                <p class="card__text">New country, new browser, repeated failures? We ask for a quick check: your own hand shape plus one random sign, held next to your face.
+
+A photo or old video can't pass, and it never signs you in on its own.</p>
+              </div>
+              <div class="card__frame"><img src="assets/card-frame.svg" alt="" /></div>
+            </article>
+            <article class="card">
+              <div class="card__art"><img src="assets/illo-recovery.svg" alt="" /></div>
+              <div class="card__body">
+                <img class="card__rule" src="assets/card-rule.svg" alt="" />
+                <h3 class="card__title">A way back in without a weak link.</h3>
+                <p class="card__text">Lost every device? Your recovery code plus a face check starts a cooldown. Every signed-in device is alerted and can cancel it.
+
+No SMS, no email link, no help-desk password reset.</p>
+              </div>
+              <div class="card__frame"><img src="assets/card-frame.svg" alt="" /></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- THREATS (light table) -->
+      <section class="threats" id="threats">
+        <div class="threats__inner">
+          <div class="threats__head">
+            <h2 class="threats__title">
+              <span class="wipe wipe--line wipe--dark" data-wipe><span class="wipe__text">Attacks We Shut Down</span><span class="wipe__bar"></span></span>
+            </h2>
+            <span class="mono threats__tag">[  Threat Model  ]</span>
+          </div>
+          <div class="threats__cols">
+            <span class="mono">Threat</span>
+            <span class="mono">Category</span>
+            <span class="mono">Defence</span>
+          </div>
+          <div class="threats__rows">
+            <a class="row" data-app-href="/threat-model"><span>Look-alike phishing site</span><span>Phishing</span><span>Origin-bound passkeys</span></a>
+            <a class="row" data-app-href="/threat-model"><span>Password reuse &amp; breach dumps</span><span>Credential theft</span><span>No passwords stored</span></a>
+            <a class="row" data-app-href="/threat-model"><span>SIM swap &amp; OTP interception</span><span>Social engineering</span><span>No OTPs anywhere</span></a>
+            <a class="row" data-app-href="/threat-model"><span>Database leak</span><span>Data breach</span><span>Public keys + sealed templates</span></a>
+            <a class="row" data-app-href="/threat-model"><span>Photo or replayed video</span><span>Spoofing</span><span>Random gesture challenge</span></a>
+            <a class="row" data-app-href="/threat-model"><span>Cloned authenticator</span><span>Device theft</span><span>signCount auto-revoke</span></a>
+            <a class="row" data-app-href="/threat-model"><span>Recovery takeover</span><span>Account takeover</span><span>Code + liveness + cooldown</span></a>
+          </div>
+          <p class="threats__note">We pointed a live phishing clone at our own app. It asked the browser for the real passkey, tried its own rpID, and relayed a forged origin to the real server. Every attempt failed, and the forged one landed in the admin audit log.</p>
+
+          <div class="threats__mobile">
+            <span class="mono">[  Threat Model  ]</span>
+            <div class="threats__m-item">
+              <h3>Look-alike phishing site</h3>
+              <p>Passkeys are bound to the real origin and rpID. The browser won't release them to a clone, and a relayed assertion fails the server's origin check.</p>
+            </div>
+            <div class="threats__m-item">
+              <h3>SIM swap &amp; OTP interception</h3>
+              <p>There are no OTPs to intercept, swap or read out over the phone. Sign-in is a cryptographic signature from your own device.</p>
+            </div>
+            <div class="threats__m-item">
+              <h3>Photo or replayed video</h3>
+              <p>Every check asks for your own hand shape plus a random sign in a random order, next to the same face, inside a tight time window.</p>
+            </div>
+          </div>
+
+          <div class="threats__cta">
+            <a class="cta cta--dark" data-app-href="/threat-model">
+              <span class="cta__icon"><svg><use href="#ico-shield" /></svg></span>
+              <span class="cta__label">
+                <span>Read the Threat Model</span>
+                <span class="cta__arrows"><svg class="cta__arrow cta__arrow--a"><use href="#arrow" /></svg><svg class="cta__arrow cta__arrow--b"><use href="#arrow" /></svg></span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- MISSION (light, dials) -->
+      <section class="mission" id="mission">
+        <div class="mission__inner">
+          <img class="mission__dial mission__dial--lg" src="assets/dial-large.svg" alt="" />
+          <img class="mission__dial mission__dial--sm" src="assets/dial-small.svg" alt="" />
+          <h2 class="mission__title">
+            <span class="wipe wipe--line wipe--dark" data-wipe><span class="wipe__text">Our Mission</span><span class="wipe__bar"></span></span>
+          </h2>
+          <div class="mission__object">
+            <div class="mission__object-inner">
+              <canvas class="cloud" data-cloud="key" data-tone="dark" aria-hidden="true"></canvas>
+            </div>
+          </div>
+          <p class="mission__text">Passwords get reused, guessed and leaked. SMS codes get swapped and read out over the phone. Secure brings phishing-proof passkeys to Indian government, education and small-business services, with a path for people on basic phones, a voice prompt on every screen, and recovery that never falls back to something weaker.</p>
+        </div>
+      </section>
+
+      <!-- UNDER THE HOOD (light, two "portraits") -->
+      <section class="hood" id="stack">
+        <div class="hood__inner">
+          <div class="hood__sticky" aria-hidden="true">
+            <div class="hood__frame">
+              <div class="hood__img"><img src="assets/panel-web.svg" alt="" /></div>
+              <div class="hood__img hood__img--next" data-hood-wipe><img src="assets/panel-bio.svg" alt="" /></div>
+            </div>
+          </div>
+
+          <div class="hood__row" data-hood-row>
+            <div class="hood__m-img"><img src="assets/panel-web.svg" alt="" /></div>
+            <div class="hood__col">
+              <div class="hood__meta"><span class="mono">web/</span><span class="mono">Next.js · SQLite · WebAuthn</span></div>
+              <p class="hood__bio">All the UI and every API route. Runs the passkey ceremonies with user verification required, checks origin, rpID, challenge and signCount on every one, scores each sign-in for risk, and writes an append-only audit trail.
+
+Admins see every registered device, the full login history and every revoked credential.</p>
+              <div class="hood__sig mono">localhost:3000</div>
+            </div>
+          </div>
+
+          <div class="hood__row" data-hood-row>
+            <div class="hood__m-img"><img src="assets/panel-bio.svg" alt="" /></div>
+            <div class="hood__col">
+              <div class="hood__meta"><span class="mono">bio/</span><span class="mono">FastAPI · InsightFace · MediaPipe</span></div>
+              <p class="hood__bio">A stateless Python service that turns raw camera frames into a pass or a fail. ArcFace embeddings match the face, MediaPipe landmarks match your own hand shape, and templates are sealed with AES-256-GCM under a key the web app never holds.
+
+Raw frames are never stored. Scores never reach the browser.</p>
+              <div class="hood__sig mono">localhost:8000</div>
+            </div>
+          </div>
+
+          <div class="hood__cta">
+            <a class="cta cta--dark" href="https://github.com/MuditGarg007/secure-cv" target="_blank" rel="noopener">
+              <span class="cta__icon"><svg><use href="#ico-github" /></svg></span>
+              <span class="cta__label">
+                <span>View the Source</span>
+                <span class="cta__arrows"><svg class="cta__arrow cta__arrow--a"><use href="#arrow" /></svg><svg class="cta__arrow cta__arrow--b"><use href="#arrow" /></svg></span>
+              </span>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FINAL CTA -->
+      <section class="final" id="start">
+        <div class="final__ticker">
+          <p class="mono">Sign up in seconds</p>
+          <p class="mono">Add any device by QR</p>
+          <p class="mono">Recover without SMS</p>
+        </div>
+        <div class="final__main">
+          <div class="final__head">
+            <h2 class="final__title">
+              <span class="wipe wipe--line wipe--dark final__line" data-wipe><span class="wipe__text">No Passwords,</span><span class="wipe__bar"></span></span>
+              <span class="wipe wipe--line wipe--dark final__line" data-wipe><span class="wipe__text">Ever Again</span><span class="wipe__bar"></span></span>
+            </h2>
+            <p class="mono final__copy">Create an account with your fingerprint, face or screen lock. Works on a laptop, a phone, or a USB/NFC security key for people without a smartphone.</p>
+          </div>
+          <div class="final__field">
+            <div class="final__dots" aria-hidden="true"></div>
+            <div class="final__pill">
+              <div class="final__slot" data-nav-dock></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" id="footer" data-footer>
+      <div class="footer__stage">
+        <div class="footer__main">
+          <div class="footer__pattern"><img src="assets/footer-pattern.svg" alt="" /></div>
+          <div class="footer__content">
+            <svg class="footer__wordmark" viewBox="0 0 1400 330" role="img" aria-label="Secure">
+              <text x="6" y="300" textLength="1380" lengthAdjust="spacingAndGlyphs">Secure</text>
+            </svg>
+            <div class="footer__cards">
+              <div class="footer__card">
+                <p class="mono footer__label">Product</p>
+                <div class="footer__links">
+                  <a class="roll" data-app-href="/signup"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>Create account</span><span>Create account</span></span></span></a>
+                  <a class="roll" data-app-href="/signin"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>Sign in</span><span>Sign in</span></span></span></a>
+                  <a class="roll" data-app-href="/link"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>Add a device</span><span>Add a device</span></span></span></a>
+                </div>
+              </div>
+              <div class="footer__card">
+                <p class="mono footer__label">Learn</p>
+                <div class="footer__links">
+                  <a class="roll" href="#how"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>How it works</span><span>How it works</span></span></span></a>
+                  <a class="roll" data-app-href="/threat-model"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>Threat model</span><span>Threat model</span></span></span></a>
+                  <a class="roll" data-app-href="/recover"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>Lost my device</span><span>Lost my device</span></span></span></a>
+                </div>
+              </div>
+              <div class="footer__card">
+                <p class="mono footer__label">Project</p>
+                <div class="footer__links">
+                  <a class="roll" href="https://github.com/MuditGarg007/secure-cv" target="_blank" rel="noopener"><span class="roll__icon"><svg><use href="#roll-arrow" /></svg></span><span class="roll__clip"><span class="roll__stack"><span>github.com/MuditGarg007/secure-cv</span><span>github.com/MuditGarg007/secure-cv</span></span></span></a>
+                </div>
+              </div>
+              <img class="footer__chrome" src="assets/footer-chrome.svg" alt="" />
+            </div>
+          </div>
+          <div class="footer__bottom">
+            <div class="footer__legal">
+              <a class="footer__mark" href="#top" aria-label="Secure"><svg><use href="#logomark" /></svg></a>
+              <p class="mono">© 2026 Secure · CC6-IC04 passwordless authentication</p>
+            </div>
+            <div class="footer__social">
+              <a class="footer__icon" href="https://github.com/MuditGarg007/secure-cv" target="_blank" rel="noopener" aria-label="GitHub"><svg><use href="#ico-github" /></svg></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
