@@ -126,15 +126,15 @@ export function LinkNewDevice() {
       <div className="flex justify-center">
         {qr ? (
           // eslint-disable-next-line @next/next/no-img-element -- data URL, nothing to optimise
-          <img src={qr} alt="QR code to link this device" width={280} height={280} className="rounded-lg border" />
+          <img src={qr} alt="QR code to link this device" width={280} height={280} className="rounded-2xl bg-paper p-3 shadow-[0_0_0_1px_var(--border)]" />
         ) : (
-          <div className="flex size-[280px] items-center justify-center rounded-lg border">
+          <div className="dot-grid flex size-[280px] items-center justify-center rounded-2xl border">
             <Loader2 className="size-8 animate-spin" />
           </div>
         )}
       </div>
       {link && (
-        <p className="text-center font-mono text-4xl font-bold tracking-[0.3em]" aria-label="Your code">
+        <p className="text-center font-mono text-4xl font-bold tracking-[0.3em] text-primary" aria-label="Your code">
           {link.shortCode.slice(0, 3)} {link.shortCode.slice(3)}
         </p>
       )}

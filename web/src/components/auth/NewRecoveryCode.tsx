@@ -44,7 +44,7 @@ export function NewRecoveryCode({ hasCode }: { hasCode: boolean }) {
   }
   if (confirming) {
     return (
-      <div className="flex flex-col gap-3 rounded-lg border p-4">
+      <div className="flex flex-col gap-3 rounded-2xl border bg-background/40 p-4">
         <p className="text-sm">
           Your old recovery code will stop working. Your device will ask for your fingerprint, face or screen lock
           first.

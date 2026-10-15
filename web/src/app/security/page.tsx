@@ -10,6 +10,7 @@ export default async function SecurityPage() {
   const { user } = await requirePageSession({ next: "/security" });
   return (
     <PageShell
+      eyebrow="Face check · Recovery"
       title="Security"
       voiceText="Security settings. Set up or change your face check, and make a new recovery code. Your device will ask for your fingerprint, face or screen lock first."
     >

@@ -49,9 +49,9 @@ export function RecoveryCodeCard({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-lg border-2 border-dashed p-4 text-center">
-        <p className="text-muted-foreground mb-2 text-sm">Your recovery code</p>
-        <p className="font-mono text-xl font-semibold tracking-wider break-all select-all" data-testid="recovery-code">
+      <div className="dot-grid rounded-2xl border border-dashed border-primary/50 bg-card p-5 text-center">
+        <p className="mono-label mb-3">[ Your recovery code ]</p>
+        <p className="font-mono text-xl font-semibold tracking-wider break-all text-primary select-all" data-testid="recovery-code">
           {code}
         </p>
       </div>

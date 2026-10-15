@@ -33,8 +33,8 @@ export function NotificationList({ items }: { items: NotificationItem[] }) {
     <div className="flex flex-col gap-2">
       <ul className="flex flex-col gap-2">
         {items.map((n) => (
-          <li key={n.id} className="flex items-start gap-3 rounded-lg border p-3">
-            <Bell className="mt-0.5 size-4 shrink-0" />
+          <li key={n.id} className="flex items-start gap-3 rounded-xl border bg-background/40 p-3">
+            <Bell className="mt-0.5 size-4 shrink-0 text-primary" />
             <div className="flex-1 text-sm">
               <p>{n.text}</p>
               <p className="text-muted-foreground mt-1 text-xs">

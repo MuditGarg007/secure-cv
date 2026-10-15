@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Activity, KeyRound, MapPin, Plus, Shield, Smartphone } from "lucide-react";
+import { Activity, ArrowRight, KeyRound, MapPin, Plus, Shield, Smartphone } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageShell } from "@/components/common/PageShell";
 import { RecoveryBanner } from "@/components/recovery/RecoveryBanner";
@@ -22,7 +21,7 @@ const LINKS = [
 function SignInLine({ label, s }: { label: string; s: SignInSummary }) {
   return (
     <p className="flex items-start gap-2 text-sm">
-      <MapPin className="mt-0.5 size-4 shrink-0" />
+      <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
       <span>
         {label}: <LocalTime ms={s.at} /> · {s.country ?? "location unknown"} · {labelFromUA(s.ua)}
       </span>
@@ -38,6 +37,7 @@ export default async function HomePage() {
 
   return (
     <PageShell
+      eyebrow="Your account"
       title={`Hello, ${user.displayName}`}
       voiceText={`Hello ${user.displayName}. You are signed in. ${
         notifications.length ? `You have ${notifications.length} new alerts.` : "You have no new alerts."
@@ -81,9 +81,18 @@ export default async function HomePage() {
 
       <div className="grid grid-cols-2 gap-2">
         {LINKS.map(({ href, label, icon: Icon }) => (
-          <Button key={href} variant="outline" className="h-14 text-base" nativeButton={false} render={<Link href={href} />}>
-            <Icon /> {label}
-          </Button>
+          <Link
+            key={href}
+            href={href}
+            className="group relative flex h-24 flex-col justify-between overflow-hidden rounded-2xl bg-card p-4 ring-1 ring-border transition-shadow hover:ring-primary/60 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+          >
+            <span aria-hidden className="dot-grid absolute inset-0 opacity-0 transition-opacity group-hover:opacity-40" />
+            <Icon className="relative size-5 text-primary" />
+            <span className="relative flex items-center justify-between text-base font-bold tracking-tighter">
+              {label}
+              <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+            </span>
+          </Link>
         ))}
       </div>
     </PageShell>

@@ -93,7 +93,7 @@ export function LinkApprove({
     <>
       <p>A new device wants to join your account:</p>
       <p className="text-center text-lg font-medium">{info.ua}</p>
-      <p className="text-center font-mono text-4xl font-bold tracking-[0.3em]">
+      <p className="text-center font-mono text-4xl font-bold tracking-[0.3em] text-primary">
         {info.shortCode.slice(0, 3)} {info.shortCode.slice(3)}
       </p>
       <p className="text-center text-lg">Is the same code on the other screen?</p>

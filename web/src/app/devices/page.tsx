@@ -9,7 +9,7 @@ export default async function DevicesPage() {
   const { session, user } = await requirePageSession({ next: "/devices" });
   const { active, removed } = listDevices(user.id);
   return (
-    <PageShell title="Your devices" voiceText="These devices can sign in to your account. Remove any you lost.">
+    <PageShell eyebrow="Passkeys" title="Your devices" voiceText="These devices can sign in to your account. Remove any you lost.">
       <DeviceManager
         linkUrl={`${env.ORIGIN}/link`}
         active={active.map((d) => ({

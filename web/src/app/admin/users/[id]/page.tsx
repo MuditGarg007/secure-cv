@@ -22,7 +22,7 @@ export default async function AdminUserPage({ params }: PageProps<"/admin/users/
   const events = listEvents({ userId: user.id });
 
   return (
-    <PageShell title={`@${user.handle}`} voiceText={`Account of ${user.displayName}.`} wide>
+    <PageShell eyebrow="Admin · User" title={`@${user.handle}`} voiceText={`Account of ${user.displayName}.`} wide>
       <Link href="/admin" className="text-sm underline">
         ← All users
       </Link>
@@ -35,7 +35,7 @@ export default async function AdminUserPage({ params }: PageProps<"/admin/users/
         {active.length === 0 ? (
           <p className="text-muted-foreground">None.</p>
         ) : (
-          <ul className="flex flex-col divide-y rounded-lg border text-sm">
+          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card text-sm">
             {active.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
                 <span>
@@ -59,7 +59,7 @@ export default async function AdminUserPage({ params }: PageProps<"/admin/users/
         {removed.length === 0 ? (
           <p className="text-muted-foreground">None.</p>
         ) : (
-          <ul className="flex flex-col divide-y rounded-lg border text-sm">
+          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card text-sm">
             {removed.map((d) => (
               <li key={d.id} className="flex flex-wrap justify-between gap-2 p-3">
                 <span className="line-through">{d.label}</span>

@@ -193,7 +193,7 @@ function CooldownStep({
   const text = `We alerted your signed-in devices. Come back on this browser after ${when}.`;
   return (
     <Step icon={<Hourglass />} title={`Step ${withFace ? 2 : 1} of ${withFace ? 3 : 2}: waiting time`} voice={text}>
-      <div className="rounded-lg border p-6 text-center">
+      <div className="rounded-2xl border bg-card p-6 text-center">
         <p className="text-sm text-muted-foreground">Time left</p>
         <p className="font-mono text-4xl font-semibold tabular-nums" aria-live="polite">
           {left === null ? "…" : formatLeft(left)}
@@ -266,7 +266,7 @@ function NewCodeStep({ code }: { code: string }) {
         This is your <strong>new recovery code</strong>. Your old code no longer works. Keep this one somewhere safe,
         not on this device only.
       </p>
-      <p className="rounded-lg border p-4 text-center font-mono text-xl font-semibold tracking-wider break-all">
+      <p className="rounded-2xl border border-dashed border-primary/50 bg-card p-4 text-center font-mono text-xl font-semibold tracking-wider text-primary break-all">
         {code}
       </p>
       <div className="grid grid-cols-2 gap-2 print:hidden">

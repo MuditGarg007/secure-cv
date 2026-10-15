@@ -15,7 +15,7 @@ export default async function StepUpPage() {
   const reason = stepUpReasonText(stepUpOrigin(ctx.session).signals);
   const intro = `This sign-in looks unusual (${reason}). Quick check: show your gesture and one hand sign next to your face.`;
   return (
-    <PageShell title="Quick check" voiceText={intro}>
+    <PageShell eyebrow="Liveness step-up" title="Quick check" voiceText={intro}>
       <p>
         This sign-in looks unusual (<strong>{reason}</strong>). Quick check to make sure it&apos;s you.
       </p>

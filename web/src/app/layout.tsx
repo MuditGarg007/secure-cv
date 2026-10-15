@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AppHeader } from "@/components/common/AppHeader";
+import { AppFooter } from "@/components/common/AppFooter";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
@@ -13,16 +14,17 @@ export const metadata: Metadata = {
   description: "Passkeys + face and gesture liveness. No passwords, no OTPs.",
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#131419" };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <TooltipProvider>
           <AppHeader />
           {children}
-          <Toaster richColors position="top-center" />
+          <AppFooter />
+          <Toaster theme="dark" richColors position="top-center" />
         </TooltipProvider>
       </body>
     </html>

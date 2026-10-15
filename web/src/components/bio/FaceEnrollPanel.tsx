@@ -249,7 +249,7 @@ export function FaceEnrollPanel({ onDone, allowSkip }: FaceEnrollPanelProps) {
             throw the images away. You can delete the template any time on the Security page.
           </p>
         </div>
-        <Label className="flex items-start gap-3 rounded-lg border p-3 text-sm font-normal leading-snug">
+        <Label className="flex items-start gap-3 rounded-xl border bg-card p-3 text-sm font-normal leading-snug">
           <Checkbox className="mt-0.5" checked={consent} onCheckedChange={(v) => setConsent(v === true)} />
           I agree to a face and hand scan and to storing an encrypted template for sign-in checks.
         </Label>

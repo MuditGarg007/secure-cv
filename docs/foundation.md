@@ -83,11 +83,14 @@ Purposes: registration `register | add_key | link_register | recovery_register`;
 | `lib/webauthn-client.ts` | `registerPasskey({optionsPath, verifyPath, optionsBody?, verifyBody?, headers?})`, `authenticatePasskey({..., autofill?})`, `reauth()`, `withReauth(fn)` (retries once after a passkey check on `REAUTH_REQUIRED`), `errorMessage(e)`. User cancel → `ApiClientError("CANCELLED")` |
 | `lib/voice.ts` | `speak(text, lang?)`, `stopSpeaking()` |
 | `lib/ua.ts` | `labelFromUA(ua)` ("Chrome on Android"), `uaFamily(ua)` (risk `ua_change`) |
-| `components/common/PageShell.tsx` | `<PageShell title voiceText? wide?>`, `BIG` button class |
+| `components/common/PageShell.tsx` | `<PageShell title eyebrow? voiceText? wide?>` (mono `[ eyebrow ]`, wipe-in title, dashed rule), `PageGrid` (faded dot-matrix backdrop), `BIG` button class |
+| `components/common/Brand.tsx` | `Logomark`, `Wipe` (wipe-reveal heading text), `CtaLink` (landing split-pill CTA, tones `lime`/`dark`/`ghost`) |
 | `components/common/VoiceButton.tsx` | `<VoiceButton text />` |
 | `components/ui/*` | shadcn (Base UI): alert, alert-dialog, badge, button, card, checkbox, dialog, dropdown-menu, input, label, progress, select, separator, skeleton, sonner (`toast` from `sonner`), table, tabs, textarea, tooltip. Link buttons: `<Button nativeButton={false} render={<Link href="/x" />}>` (without `nativeButton={false}` Base UI logs an error) |
 
-The root layout renders `AppHeader` (nav + sign out) and the toaster. Sign-out calls `POST /api/auth/logout` (agent A).
+The root layout renders `AppHeader` (nav + sign out), `AppFooter` and the toaster.
+
+Visual style mirrors `landing/`: one dark theme (`html.dark`), tokens in `web/src/app/globals.css` (`--ink` background, `--lime` primary, `--paper`, `--fg-3`, `--gray`), Geist + Geist Mono, plus `.mono-label`, `.dot-grid`, `.rule-dashed`, `.wipe` and `.cta` classes. A print media query switches the tokens to ink-on-paper. Use the tokens (`bg-primary`, `text-fg-3`, `bg-paper`), not raw hex. Sign-out calls `POST /api/auth/logout` (agent A).
 
 ## Contract stubs
 Listed in `docs/agents/workflow.md#3-contracts-between-agents`. Read the header comment of each stub for its exact behaviour.

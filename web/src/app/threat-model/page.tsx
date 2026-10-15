@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { ShieldAlert, ShieldCheck, ShieldQuestion } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { VoiceButton } from "@/components/common/VoiceButton";
+import { PageGrid } from "@/components/common/PageShell";
+import { Wipe } from "@/components/common/Brand";
 import { PrintButton } from "./PrintTrigger";
 
 export const metadata: Metadata = {
@@ -51,24 +53,27 @@ const INTRO =
 
 export default function ThreatModelPage() {
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-6 print:max-w-none print:px-0 print:py-0">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Threat model</h1>
-          <p className="text-sm text-muted-foreground">
-            Passkeys first, biometrics second. Last reviewed with the built system.
-          </p>
-        </div>
+    <main className="relative isolate mx-auto w-full max-w-4xl flex-1 px-4 pt-8 pb-12 print:max-w-none print:px-0 print:py-0">
+      <PageGrid />
+      <p className="mono-label mb-3">[ Threat model ]</p>
+      <div className="flex items-start justify-between gap-3">
+        <h1 className="min-w-0 text-[2.125rem] leading-[1.05] font-bold sm:text-[3.5rem]">
+          <Wipe>Attacks We Shut Down</Wipe>
+        </h1>
         <div className="flex gap-2 print:hidden">
           <VoiceButton text={INTRO} />
           <PrintButton />
         </div>
       </div>
+      <hr className="rule-dashed mt-6 mb-6" />
 
-      <p className="mb-6 max-w-prose text-sm">{INTRO}</p>
+      <div className="mb-10 flex flex-col gap-3 sm:flex-row sm:justify-between">
+        <p className="max-w-prose text-sm text-fg-3">{INTRO}</p>
+        <p className="mono-label sm:max-w-56 sm:text-right">Passkeys first, biometrics second · reviewed with the built system</p>
+      </div>
 
       <section className="mb-8 break-inside-avoid">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-green-700 dark:text-green-500">
+        <h2 className="mb-3 flex items-center gap-2 text-2xl font-bold text-primary print:text-green-700">
           <ShieldCheck className="size-5" /> Covered
           <Badge variant="secondary">{covered.length}</Badge>
         </h2>
@@ -76,7 +81,7 @@ export default function ThreatModelPage() {
       </section>
 
       <section className="mb-8 break-inside-avoid">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-amber-700 dark:text-amber-500">
+        <h2 className="mb-3 flex items-center gap-2 text-2xl font-bold text-amber-400 print:text-amber-700">
           <ShieldQuestion className="size-5" /> Partially covered
           <Badge variant="secondary">{partial.length}</Badge>
         </h2>
@@ -84,11 +89,11 @@ export default function ThreatModelPage() {
       </section>
 
       <section className="mb-8 break-inside-avoid">
-        <h2 className="mb-2 flex items-center gap-2 text-lg font-semibold text-destructive">
+        <h2 className="mb-3 flex items-center gap-2 text-2xl font-bold text-destructive">
           <ShieldAlert className="size-5" /> Not covered
           <Badge variant="secondary">{notCovered.length}</Badge>
         </h2>
-        <ul className="list-disc space-y-1 pl-6 text-sm">
+        <ul className="list-disc space-y-1.5 pl-6 text-sm text-fg-3 marker:text-destructive print:text-foreground">
           {notCovered.map((t) => (
             <li key={t}>{t}</li>
           ))}
@@ -107,11 +112,14 @@ export default function ThreatModelPage() {
 // screens and in print. No horizontal-scroll table, which would hide the mitigation on a phone.
 function ThreatTable({ rows, head }: { rows: [string, string][]; head: string }) {
   return (
-    <dl className="divide-y rounded-lg border text-sm">
+    <dl className="divide-y border-y text-sm">
       {rows.map(([threat, detail]) => (
-        <div key={threat} className="grid gap-x-4 gap-y-1 p-3 sm:grid-cols-[2fr_3fr] print:grid-cols-[2fr_3fr] break-inside-avoid">
-          <dt className="font-medium text-foreground">{threat}</dt>
-          <dd className="text-muted-foreground">
+        <div
+          key={threat}
+          className="group grid gap-x-4 gap-y-1 px-3 py-3.5 transition-colors duration-700 hover:bg-paper hover:text-ink hover:duration-200 sm:grid-cols-[2fr_3fr] print:grid-cols-[2fr_3fr] print:hover:bg-transparent break-inside-avoid"
+        >
+          <dt className="font-mono text-xs leading-snug uppercase">{threat}</dt>
+          <dd className="text-muted-foreground group-hover:text-ink/75">
             <span className="sr-only">{head}: </span>
             {detail}
           </dd>

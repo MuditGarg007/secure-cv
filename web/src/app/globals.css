@@ -7,6 +7,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-fg-3: var(--fg-3);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
@@ -49,72 +52,68 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Palette shared with landing/styles.css: ink background, lime accent, cool greys. */
+  --ink: #131419;
+  --s1: #202128;
+  --s2: #24252c;
+  --gray: #63646a;
+  --paper: #f2f2f6;
+  --fg-2: #dbdbe9;
+  --fg-3: #c2c2dd;
+  --lime: #d2fe71;
+  --edge: #d8dee8;
+
+  --background: var(--ink);
+  --foreground: var(--paper);
+  --card: var(--s1);
+  --card-foreground: var(--paper);
+  --popover: var(--s2);
+  --popover-foreground: var(--paper);
+  --primary: var(--lime);
+  --primary-foreground: var(--ink);
+  --secondary: var(--s2);
+  --secondary-foreground: var(--paper);
+  --muted: var(--s1);
+  --muted-foreground: #a4a5b8;
+  --accent: var(--s2);
+  --accent-foreground: var(--paper);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: color-mix(in srgb, var(--edge) 13%, transparent);
+  --input: color-mix(in srgb, var(--edge) 18%, transparent);
+  --ring: var(--lime);
+  --chart-1: var(--lime);
+  --chart-2: var(--fg-3);
+  --chart-3: var(--gray);
+  --chart-4: var(--s2);
+  --chart-5: var(--s1);
+  --radius: 0.75rem;
+  --sidebar: var(--s1);
+  --sidebar-foreground: var(--paper);
+  --sidebar-primary: var(--lime);
+  --sidebar-primary-foreground: var(--ink);
+  --sidebar-accent: var(--s2);
+  --sidebar-accent-foreground: var(--paper);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--lime);
+
+  --ease-out: cubic-bezier(.215, .61, .355, 1);
+  --ease-io: cubic-bezier(.645, .045, .355, 1);
+  color-scheme: dark;
 }
 
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+/* Paper-on-ink for printing (threat model, recovery code). */
+@media print {
+  :root {
+    --background: #fff;
+    --foreground: var(--ink);
+    --card: #fff;
+    --card-foreground: var(--ink);
+    --muted-foreground: #4a4b55;
+    --border: #d4d4dc;
+    --primary: var(--ink);
+    --primary-foreground: #fff;
+    color-scheme: light;
+  }
 }
 
 @layer base {
@@ -123,8 +122,121 @@
   }
   body {
     @apply bg-background text-foreground;
+    letter-spacing: -0.015em;
   }
   html {
     @apply font-sans;
   }
+  h1, h2, h3 {
+    letter-spacing: -0.045em;
+  }
+  ::selection {
+    background: var(--lime);
+    color: var(--ink);
+  }
 }
+
+/* ---------- Landing-page motifs (see landing/styles.css) ---------- */
+
+@layer components {
+  /* Small uppercase Geist Mono label: section eyebrows, table heads, meta. */
+  .mono-label {
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 0.6875rem;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    color: var(--muted-foreground);
+  }
+
+  /* Dot-matrix fill used by the landing hero tiles and footer cards. */
+  .dot-grid {
+    background-image: radial-gradient(circle, rgb(242 242 246 / 0.32) 0.5px, transparent 0.5px);
+    background-size: 3px 3px;
+  }
+
+  .rule-dashed {
+    border: 0;
+    border-top: 1px dashed var(--gray);
+  }
+}
+
+/* Wipe reveal: a bar sweeps across, the text follows it in. Pure CSS, plays once on mount. */
+@property --wipe-lead { syntax: "<number>"; inherits: true; initial-value: 1; }
+@property --wipe-trail { syntax: "<number>"; inherits: true; initial-value: 1; }
+@keyframes wipe-lead { from { --wipe-lead: 0; } to { --wipe-lead: 1; } }
+@keyframes wipe-trail { from { --wipe-trail: 0; } to { --wipe-trail: 1; } }
+
+.wipe {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  animation: wipe-lead 0.5s var(--ease-io) both, wipe-trail 0.5s var(--ease-io) 0.22s both;
+}
+.wipe__text {
+  display: block;
+  clip-path: inset(-0.25em calc(100% - var(--wipe-trail) * 100%) -0.25em 0);
+}
+.wipe__bar {
+  position: absolute;
+  inset: 0.12em 0 0;
+  background: var(--paper);
+  clip-path: inset(0 calc(100% - var(--wipe-lead) * 100%) 0 calc(var(--wipe-trail) * 100%));
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wipe { animation: none; }
+}
+@media print {
+  .wipe__bar { display: none; }
+  .wipe__text { clip-path: none; }
+}
+
+/* Split-pill CTA from the landing page: icon block + label block, arrow slides on hover. */
+.cta {
+  --cta-inner: 0.75rem;
+  --cta-r: 0.75rem;
+  --cta-swap: 0;
+  --cta-x: 0px;
+  display: inline-flex;
+  align-items: stretch;
+  outline: none;
+}
+@media (hover: hover) {
+  .cta:hover { --cta-swap: 1; --cta-x: 1.5rem; --cta-inner: 0px; }
+}
+.cta:active { --cta-swap: 1; --cta-x: 1.75rem; --cta-inner: 0px; }
+.cta:focus-visible .cta__icon, .cta:focus-visible .cta__label { box-shadow: 0 0 0 3px color-mix(in srgb, var(--lime) 45%, transparent); }
+.cta--lime { --cta-fill: var(--lime); color: var(--ink); }
+.cta--dark { --cta-fill: var(--paper); color: var(--ink); }
+.cta--ghost { --cta-fill: var(--s2); color: var(--paper); }
+.cta__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: -1px;
+  padding: 0 0.75rem;
+  border-radius: var(--cta-r) var(--cta-inner) var(--cta-inner) var(--cta-r);
+  background: var(--cta-fill);
+  transition: border-radius 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.cta__icon svg { width: 1.5rem; height: 1.5rem; }
+.cta__label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 3rem;
+  padding: 0.5rem 0.875rem 0.5rem 1rem;
+  border-radius: var(--cta-inner) var(--cta-r) var(--cta-r) var(--cta-inner);
+  background: var(--cta-fill);
+  font-weight: 500;
+  font-size: 1.0625rem;
+  white-space: nowrap;
+  transition: border-radius 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.cta__arrows { position: relative; width: 1.5rem; height: 1.5rem; flex-shrink: 0; overflow: hidden; }
+.cta__arrow { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform 0.25s var(--ease-out), opacity 0.25s var(--ease-out); }
+.cta__arrow--a { transform: translateX(var(--cta-x)); opacity: calc(1 - var(--cta-swap)); }
+.cta__arrow--b { transform: translateX(calc(var(--cta-x) - 1.5rem)); opacity: var(--cta-swap); }

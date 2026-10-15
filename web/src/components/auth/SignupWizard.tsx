@@ -97,8 +97,12 @@ export function SignupWizard({ debugRisk }: { debugRisk: boolean }) {
 
   const s = STEPS[step];
   return (
-    <PageShell title={s.title} voiceText={s.voice}>
-      <p className="text-muted-foreground text-sm">Step {s.n} of 4</p>
+    <PageShell eyebrow={`Step ${s.n} of 4`} title={s.title} voiceText={s.voice}>
+      <div className="grid grid-cols-4 gap-1.5" aria-hidden>
+        {[1, 2, 3, 4].map((n) => (
+          <span key={n} className={`h-1 rounded-full ${n <= s.n ? "bg-primary" : "bg-secondary"}`} />
+        ))}
+      </div>
 
       {error && (
         <Alert variant="destructive">

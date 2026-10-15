@@ -4,7 +4,7 @@ import { labelFromUA } from "@/lib/ua";
 import { Badge } from "@/components/ui/badge";
 
 const TONE_CLASS: Record<EventTone, string> = {
-  allowed: "text-green-700 dark:text-green-400",
+  allowed: "text-primary",
   step_up: "text-amber-600 dark:text-amber-400",
   blocked: "text-red-600 dark:text-red-400",
   device: "text-blue-700 dark:text-blue-400",
@@ -20,7 +20,7 @@ const fmt = new Intl.DateTimeFormat("en-GB", { dateStyle: "medium", timeStyle: "
 export function EventList({ events, admin = false }: { events: EventRow[]; admin?: boolean }) {
   if (events.length === 0) return <p className="text-muted-foreground">No activity yet.</p>;
   return (
-    <ul className="flex flex-col divide-y rounded-lg border">
+    <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card">
       {events.map((e) => {
         const v = viewEvent(e);
         const device = e.deviceLabel ?? (e.ua ? labelFromUA(e.ua) : null);

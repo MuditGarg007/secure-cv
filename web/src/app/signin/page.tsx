@@ -11,6 +11,7 @@ export default async function SignInPage({ searchParams }: PageProps<"/signin">)
   if (ctx && !ctx.session.stepUpPending) redirect(next ?? "/home");
   return (
     <PageShell
+      eyebrow="Passkey sign-in"
       title="Sign in"
       voiceText="Sign in with your passkey. Your device will ask for your fingerprint, face or screen lock. No password needed."
     >

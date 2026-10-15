@@ -101,7 +101,7 @@ export function DeviceManager({
       {removed.length > 0 && (
         <section className="mt-4">
           <h2 className="mb-2 text-lg font-semibold">Removed devices</h2>
-          <ul className="flex flex-col divide-y rounded-lg border text-sm">
+          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card text-sm">
             {removed.map((d) => (
               <li key={d.id} className="flex flex-wrap justify-between gap-2 p-3 text-muted-foreground">
                 <span className="line-through">{d.label}</span>

@@ -21,7 +21,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
   const revoked = revokedCredentials();
 
   return (
-    <PageShell title="Admin" voiceText="Users, devices, sign-in history and removed devices." wide>
+    <PageShell eyebrow="Admin console" title="Admin" voiceText="Users, devices, sign-in history and removed devices." wide>
       <section>
         <h2 className="mb-2 text-lg font-semibold">Users</h2>
         <Table>
@@ -61,7 +61,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
         {revoked.length === 0 ? (
           <p className="text-muted-foreground">None.</p>
         ) : (
-          <ul className="flex flex-col divide-y rounded-lg border text-sm">
+          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card text-sm">
             {revoked.map((c) => (
               <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
                 <span>

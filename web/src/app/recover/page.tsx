@@ -9,14 +9,14 @@ const VOICE =
 
 export default function RecoverPage() {
   return (
-    <PageShell title="Recover your account" voiceText={VOICE}>
+    <PageShell eyebrow="Account recovery" title="Recover your account" voiceText={VOICE}>
       <p className="text-muted-foreground">
         Lost your phone or laptop? Use the recovery code you saved when you created your account.
       </p>
       <RecoverStartForm />
-      <section className="rounded-lg border p-4 text-sm">
-        <h2 className="mb-2 font-medium">What happens next</h2>
-        <ol className="list-decimal space-y-1 pl-5">
+      <section className="rounded-2xl bg-card p-5 text-sm ring-1 ring-border">
+        <h2 className="mono-label mb-3">[ What happens next ]</h2>
+        <ol className="list-decimal space-y-2 pl-5 text-fg-3 marker:font-mono marker:text-primary">
           <li>If you set up a face check, show your face, your own gesture and one hand sign on camera.</li>
           <li>
             We wait (1 day with the face check, 3 days without) and alert all your signed-in devices,

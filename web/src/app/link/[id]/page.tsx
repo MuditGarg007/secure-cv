@@ -7,6 +7,7 @@ export default async function LinkApprovePage({ params }: PageProps<"/link/[id]"
   const ctx = await getCurrentSession();
   return (
     <PageShell
+      eyebrow="Device linking"
       title="Approve new device?"
       voiceText="Someone wants to add a device to your account. Only approve if the code is the same on the other screen."
     >

@@ -7,7 +7,7 @@ export default async function ActivityPage() {
   const { user } = await requirePageSession({ next: "/activity" });
   const events = listEvents({ userId: user.id });
   return (
-    <PageShell title="Activity" voiceText="Your recent sign-ins and device changes. Newest first.">
+    <PageShell eyebrow="Audit trail" title="Activity" voiceText="Your recent sign-ins and device changes. Newest first.">
       <p className="text-sm text-muted-foreground">✓ allowed · ⚠ extra check · ⛔ blocked · 🔑 device change</p>
       <EventList events={events} />
     </PageShell>
