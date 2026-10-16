@@ -43,6 +43,7 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 html { background: var(--bg); color-scheme: dark; scroll-behavior: smooth; }
+html.lenis { scroll-behavior: auto; } /* Lenis does the smoothing */
 body {
   margin: 0;
   background: var(--bg);

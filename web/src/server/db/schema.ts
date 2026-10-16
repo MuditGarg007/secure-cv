@@ -61,6 +61,9 @@ export const challengePurposes = [
   "recovery_register",
   "stepup_liveness",
   "recovery_liveness",
+  "oauth_code", // "Sign in with Secure": one-time authorization code for a client app
+  "oauth_liveness", // liveness check a client app asked for (targetId = sessionId)
+  "oauth_liveness_pass", // short-lived marker that oauth_liveness passed (targetId = sessionId)
 ] as const;
 export type ChallengePurpose = (typeof challengePurposes)[number];
 
@@ -146,6 +149,7 @@ export const authEventTypes = [
   "recovery_completed",
   "clone_detected",
   "admin_action",
+  "app_authorized", // a client app received this user's identity ("Sign in with Secure")
 ] as const;
 export type AuthEventType = (typeof authEventTypes)[number];
 

@@ -58,6 +58,15 @@ Frames are JPEG, ≤ 300 KB each (`MAX_FRAME_BYTES`). `meta.fake` (`pass` / `fai
 | POST | `/recovery/:id/complete/options` | cookie:rec_bind | → `{options}`, only in `ready` |
 | POST | `/recovery/:id/complete/verify` | cookie:rec_bind | `{response}` → `{ok, newRecoveryCode}` + `sid`. Revokes all old credentials + sessions. |
 
+## Sign in with Secure (docs/oauth.md)
+| Method | Path | Auth | Body → Response |
+|---|---|---|---|
+| GET | `/oauth/authorize` (page) | full (redirects to `/signin?next=`) | query `response_type=code, client_id, redirect_uri, state, code_challenge, code_challenge_method=S256, acr_values?, binding_message?` → consent screen |
+| POST | `/oauth/approve` | full+reauth | authorize params + `{decision:"approve"\|"deny"}` → `{redirect}`. `acr_values=liveness` also needs a passed app liveness check, else 403 `STEP_UP_REQUIRED` |
+| POST | `/oauth/liveness/challenge` | full+reauth | → same as step-up challenge |
+| POST | `/oauth/liveness/verify` | full+reauth | multipart → `{passed, hint?, attemptsLeft}` |
+| POST | `/oauth/token` | none (server to server, no Origin check) | form `grant_type=authorization_code, code, redirect_uri, client_id, code_verifier` → `{sub, handle, name, acr, amr, auth_time}` / 400 `{error:"invalid_request"\|"invalid_grant"}` |
+
 ## Admin writes
 | Method | Path | Auth |
 |---|---|---|
@@ -87,4 +96,4 @@ Frames are JPEG, ≤ 300 KB each (`MAX_FRAME_BYTES`). `meta.fake` (`pass` / `fai
 | `BIO_UNAVAILABLE` | 503 |
 | `INTERNAL` | 500 |
 
-Implemented in `web/src/server/http.ts`. Mutating requests must carry `Origin: <ORIGIN>` (checked by `route()`); otherwise 403 `FORBIDDEN`.
+Implemented in `web/src/server/http.ts`. Mutating requests must carry `Origin: <ORIGIN>` (checked by `route()`); otherwise 403 `FORBIDDEN`. Exception: `/oauth/token` (called by app servers).

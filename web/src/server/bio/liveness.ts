@@ -23,7 +23,7 @@ import { carriedAttempts, hintFromReasons, validTimestamps } from "@/server/bio/
 // ============================================================================
 
 export type { Gesture, Prompt };
-export type LivenessPurpose = "stepup_liveness" | "recovery_liveness";
+export type LivenessPurpose = "stepup_liveness" | "recovery_liveness" | "oauth_liveness";
 export type LivenessHint = "face_not_visible" | "gesture_not_seen" | "too_slow" | "try_again";
 
 /** Exactly what the challenge routes return to the browser. */

@@ -11,5 +11,6 @@ __pycache__/
 .pytest_cache/
 phish/node_modules/
 phish/test-results/
+bank/data/
 *.log
 .DS_Store

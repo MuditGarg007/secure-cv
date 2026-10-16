@@ -48,7 +48,7 @@ One table for WebAuthn and liveness challenges. Delete on use; ignore if `expire
 | col | notes |
 |---|---|
 | id | pk, also stored in an httpOnly `flow` cookie for WebAuthn |
-| purpose | `register` / `login` / `reauth` / `add_key` / `link_approve` / `link_register` / `recovery_register` / `stepup_liveness` / `recovery_liveness` |
+| purpose | `register` / `login` / `reauth` / `add_key` / `link_approve` / `link_register` / `recovery_register` / `stepup_liveness` / `recovery_liveness` / `oauth_code` / `oauth_liveness` / `oauth_liveness_pass` (docs/oauth.md) |
 | challenge | WebAuthn challenge, or JSON prompt list for liveness |
 | user_id | nullable |
 | target_id | linkId / recoveryId the approval is bound to |
@@ -88,7 +88,7 @@ One table for WebAuthn and liveness challenges. Delete on use; ignore if `expire
 |---|---|
 | id | autoincrement |
 | user_id, credential_id | nullable |
-| type | `register`, `login_success`, `login_fail`, `step_up_required`, `step_up_pass`, `step_up_fail`, `blocked`, `logout`, `reauth`, `bio_enrolled`, `bio_deleted`, `device_linked`, `credential_added`, `credential_revoked`, `recovery_code_generated`, `recovery_started`, `recovery_liveness_pass`, `recovery_liveness_fail`, `recovery_cancelled`, `recovery_completed`, `clone_detected`, `admin_action` |
+| type | `register`, `login_success`, `login_fail`, `step_up_required`, `step_up_pass`, `step_up_fail`, `blocked`, `logout`, `reauth`, `bio_enrolled`, `bio_deleted`, `device_linked`, `credential_added`, `credential_revoked`, `recovery_code_generated`, `recovery_started`, `recovery_liveness_pass`, `recovery_liveness_fail`, `recovery_cancelled`, `recovery_completed`, `clone_detected`, `admin_action`, `app_authorized` |
 | ip, ua, country | |
 | risk_score, risk_signals | JSON |
 | metadata | JSON, never secrets or images |

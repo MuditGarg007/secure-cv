@@ -6,7 +6,7 @@ Entry point for coding agents working in this repo. Read this file first, then t
 
 Hackathon build for the problem statement in `ps.md` (CC6-IC04): passwordless auth. Passkeys (WebAuthn) are the login credential. Face + hand-gesture liveness is the USP: it is the step-up check for risky logins and a factor in account recovery. It is NEVER a standalone login (see `docs/security.md`).
 
-This is a hackathon demo, not production. Prefer the simplest thing that works and demos well. Two processes (`web/` Next.js + SQLite, `bio/` FastAPI), no other infra.
+This is a hackathon demo, not production. Prefer the simplest thing that works and demos well. Two processes (`web/` Next.js + SQLite, `bio/` FastAPI), no other infra. `bank/` is a separate zero-dependency sample app that signs in with Secure (`docs/oauth.md`).
 
 Status: foundation (M0) is on `main`. The rest is built by four parallel agents, each in its own worktree/branch, then merged by a master reviewer.
 
@@ -27,6 +27,7 @@ If you are one of the four agents (auth, bio, devices, recovery), **`docs/agents
 | `docs/biometrics.md` | Face/gesture enrollment, liveness challenge, bio service. |
 | `docs/security.md` | Threat model and invariants. Read before any auth/session/recovery change. |
 | `docs/phishing-demo.md` | Building the phishing-resistance demo. |
+| `docs/oauth.md` | "Sign in with Secure" for sample apps (the `bank/` mock bank). |
 | `docs/roadmap.md` | Milestones and demo script (agents: use your brief instead). |
 | `docs/foundation.md` | Shared helpers already on `main`. Read before writing any web code. |
 | `docs/agents/workflow.md` | Parallel-agent rules (STRICT). |

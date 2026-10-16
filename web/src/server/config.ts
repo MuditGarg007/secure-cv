@@ -75,3 +75,20 @@ export const RECOVERY_LIVENESS_MAX_FAILS = 3;
 // /recover/[id] re-reads the state this often while cooling down.
 export const RECOVERY_POLL_MS = 5 * 1000;
 // ===== end recovery =====
+
+// ===== oauth ("Sign in with Secure" for sample apps, docs/oauth.md) =====
+export const OAUTH_CODE_TTL_MS = 60 * 1000;
+// How long a passed app liveness check can be spent on one approval.
+export const OAUTH_LIVENESS_PASS_TTL_MS = 2 * 60 * 1000;
+// acr_values an app may ask for. "passkey": fresh passkey (within REAUTH_WINDOW_MS).
+// "liveness": fresh passkey AND a face + gesture check, for high-risk actions.
+export const OAUTH_ACRS = ["passkey", "liveness"] as const;
+export const OAUTH_BINDING_MESSAGE_MAX = 80;
+// Registered client apps. Public clients: PKCE (S256) + exact redirect_uri match, no secret.
+export const OAUTH_CLIENTS: Record<string, { name: string; redirectUris: string[] }> = {
+  mockbank: {
+    name: "Mock Bank of Localhost",
+    redirectUris: ["http://localhost:4000/callback"],
+  },
+};
+// ===== end oauth =====

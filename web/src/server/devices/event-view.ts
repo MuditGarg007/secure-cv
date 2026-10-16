@@ -34,6 +34,7 @@ const TONE: Record<AuthEventType, EventTone> = {
   recovery_code_generated: "info",
   recovery_cancelled: "info",
   admin_action: "info",
+  app_authorized: "allowed",
 };
 
 const LABEL: Record<AuthEventType, string> = {
@@ -59,6 +60,7 @@ const LABEL: Record<AuthEventType, string> = {
   recovery_completed: "Account recovered",
   clone_detected: "Copied passkey detected",
   admin_action: "Admin action",
+  app_authorized: "Signed in to an app",
 };
 
 const LINK_STAGE_LABEL: Record<string, string> = {

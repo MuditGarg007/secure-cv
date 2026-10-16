@@ -27,7 +27,7 @@ export function SignInPanel({ next, debugRisk }: { next: string | null; debugRis
   const [blocked, setBlocked] = useState(false);
 
   function done(res: LoginResult) {
-    if (res.status === "step_up") router.replace("/signin/step-up");
+    if (res.status === "step_up") router.replace(next ? `/signin/step-up?next=${encodeURIComponent(next)}` : "/signin/step-up");
     else router.replace(next ?? "/home");
     router.refresh();
   }

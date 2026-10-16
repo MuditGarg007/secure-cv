@@ -1,0 +1,11 @@
+{
+  "name": "mockbank",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Sample app: a 2010s-style mock bank that signs users in with Secure passkeys (docs/oauth.md).",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.mjs"
+  }
+}

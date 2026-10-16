@@ -21,6 +21,7 @@ Hackathon scope. Two processes, one SQLite file, no other infra.
                                │ template crypto│  └────────────┘
                                └────────────────┘
   phish/  look-alike sign-in page for the phishing demo (docs/phishing-demo.md)
+  bank/   Mock Bank sample app (Node, no deps) using "Sign in with Secure" (docs/oauth.md)
 ```
 
 - **web**: all UI and all `/api/*` routes. Owns the DB. Runs WebAuthn ceremonies, sessions, the risk check, and forwards camera frames to bio.

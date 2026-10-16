@@ -21,13 +21,30 @@
   // ---------- App links ----------
   for (const a of document.querySelectorAll("[data-app-href]")) a.href = APP_URL + a.dataset.appHref;
 
+  // ---------- Smooth scroll ----------
+  // Lenis drives window scroll, so native scroll events (and onScroll below) still fire.
+  const lenis = !reduced && window.Lenis ? new Lenis({ autoRaf: true, anchors: true }) : null;
+
   // ---------- Intro ----------
+  // The intro plays over the hero, so always land at the top: stop the browser restoring
+  // the old scroll position on reload ("instant" bypasses scroll-behavior: smooth).
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+  const toTop = () => {
+    if (location.hash) return;
+    if (lenis) lenis.scrollTo(0, { immediate: true, force: true });
+    else scrollTo({ top: 0, left: 0, behavior: "instant" });
+  };
+  toTop();
   const INTRO_MS = reduced ? 0 : 3400;
   document.body.classList.add("is-intro");
+  lenis?.stop();
   const start = () => {
     root.classList.add("is-ready");
+    toTop();
     setTimeout(() => {
+      toTop();
       document.body.classList.remove("is-intro");
+      lenis?.start();
       nav.classList.add("is-shown");
       observeWipes();
     }, INTRO_MS);

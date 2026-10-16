@@ -14,7 +14,7 @@ async function signOut() {
   await api("/api/auth/logout", { method: "POST" }).catch(() => {});
 }
 
-export function StepUpClient({ enrolled }: { enrolled: boolean }) {
+export function StepUpClient({ enrolled, next }: { enrolled: boolean; next: string | null }) {
   const router = useRouter();
   const [ended, setEnded] = useState(!enrolled);
 
@@ -43,7 +43,7 @@ export function StepUpClient({ enrolled }: { enrolled: boolean }) {
         verifyUrl="/api/stepup/verify"
         onPassed={() => {
           toast.success("Verified. Welcome back.");
-          router.replace("/home");
+          router.replace(next ?? "/home");
           router.refresh();
         }}
         onFailedFinal={() => {

@@ -100,7 +100,9 @@ export async function requirePageSession(
 ): Promise<SessionContext> {
   const ctx = await getCurrentSession();
   if (!ctx) redirect(opts.next ? `/signin?next=${encodeURIComponent(opts.next)}` : "/signin");
-  if (ctx.session.stepUpPending) redirect("/signin/step-up");
+  if (ctx.session.stepUpPending) {
+    redirect(opts.next ? `/signin/step-up?next=${encodeURIComponent(opts.next)}` : "/signin/step-up");
+  }
   if (opts.admin && !isAdmin(ctx.user)) redirect("/home");
   return ctx;
 }
